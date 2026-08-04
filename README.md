@@ -11,6 +11,20 @@
 
 ---
 
+## Why we built tourara
+
+We were looking for a **fully customizable open-source touring system** — one that let us own the UI, the step actions, and the animations without fighting the library.
+
+After searching the ecosystem, we could not find a tour component that satisfied all of those needs with complete control over chrome and behavior. So we built the engine ourselves, used it in our own products, and are publishing it so other developers can ship onboarding the same way.
+
+**tourara exists to give you:**
+
+1. **Custom UI** — tooltip, footer, and mask slots so the tour matches your product, not a fixed skin  
+2. **Custom actions** — interactive next/prev, click-to-advance, and DOM helpers for real app flows  
+3. **Custom motion** — placement, auto-scroll, and transitions you can tune instead of a black box  
+
+---
+
 ## Features
 
 - **Spotlight mask** — full-viewport SVG overlay with a rounded cutout around the target
