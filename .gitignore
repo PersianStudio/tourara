@@ -1,0 +1,9 @@
+node_modules
+dist
+showcase-dist
+.DS_Store
+*.local
+.vite
+*.log
+.turbo
+coverage

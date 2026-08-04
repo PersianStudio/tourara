@@ -1,0 +1,240 @@
+:root {
+  --ink: #1a2421;
+  --foam: #f3efe6;
+  --lagoon: #0d6e6e;
+  --ember: #c45c26;
+  --sand: #e8dfd0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(13, 110, 110, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(196, 92, 38, 0.14), transparent 50%),
+    linear-gradient(180deg, #efe8da 0%, var(--foam) 40%, #e7eee9 100%);
+  font-family: 'Sora', system-ui, sans-serif;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.hero {
+  min-height: min(72vh, 640px);
+  display: grid;
+  align-content: end;
+  gap: 1rem;
+  padding: 2rem 0 3rem;
+  animation: rise-in 700ms ease both;
+}
+
+.brand {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(3.4rem, 10vw, 6.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.hero-lead {
+  max-width: 34rem;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  color: rgba(26, 36, 33, 0.78);
+  margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.35rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: var(--lagoon);
+  color: #f7fffe;
+  box-shadow: 0 10px 24px rgba(13, 110, 110, 0.28);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid rgba(26, 36, 33, 0.22);
+}
+
+.demo-shell {
+  margin-top: 1rem;
+  border: 1px solid rgba(26, 36, 33, 0.1);
+  background: rgba(255, 253, 248, 0.72);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  animation: rise-in 900ms ease both;
+}
+
+.demo-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid rgba(26, 36, 33, 0.08);
+  background: linear-gradient(90deg, rgba(13, 110, 110, 0.08), transparent 55%);
+}
+
+.demo-logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.demo-body {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 360px;
+}
+
+@media (max-width: 760px) {
+  .demo-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-side {
+  padding: 1rem;
+  border-right: 1px solid rgba(26, 36, 33, 0.08);
+  background: rgba(232, 223, 208, 0.35);
+}
+
+.demo-side button,
+.demo-nav button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.demo-side button:hover,
+.demo-nav button:hover {
+  background: rgba(13, 110, 110, 0.1);
+}
+
+.demo-main {
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.panel {
+  padding: 1rem 1.1rem;
+  background: #fffdf8;
+  border: 1px solid rgba(26, 36, 33, 0.08);
+}
+
+.panel h3 {
+  margin: 0 0 0.35rem;
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.panel p {
+  margin: 0;
+  color: rgba(26, 36, 33, 0.72);
+  line-height: 1.5;
+}
+
+.float-mark {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #1aa3a3, var(--lagoon));
+  animation: drift 5s ease-in-out infinite;
+  box-shadow: 0 18px 40px rgba(13, 110, 110, 0.28);
+}
+
+.section {
+  margin-top: 3.5rem;
+  animation: rise-in 1s ease both;
+}
+
+.section h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  margin: 0 0 0.5rem;
+}
+
+.section p {
+  max-width: 40rem;
+  color: rgba(26, 36, 33, 0.75);
+  line-height: 1.55;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92em;
+  background: rgba(13, 110, 110, 0.08);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+.footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(26, 36, 33, 0.1);
+  color: rgba(26, 36, 33, 0.6);
+  font-size: 0.92rem;
+}
