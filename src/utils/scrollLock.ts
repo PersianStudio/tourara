@@ -1,0 +1,52 @@
+/**
+ * Blocks user-driven scrolling while allowing programmatic scrollIntoView / scrollTo.
+ * Uses event prevention instead of overflow:hidden (which breaks scrollIntoView).
+ */
+export function lockUserScroll(): () => void {
+  const blockWheelTouch = (event: Event) => {
+    event.preventDefault();
+  };
+
+  const blockKeys = (event: KeyboardEvent) => {
+    const target = event.target as HTMLElement | null;
+    // Allow typing / arrows inside the tour tooltip for a11y navigation.
+    if (target?.closest?.('[id^="tour-tooltip-container"], [id*="tour-tooltip"]')) {
+      return;
+    }
+
+    const scrollKeys = new Set([
+      ' ',
+      'Spacebar',
+      'PageUp',
+      'PageDown',
+      'Home',
+      'End',
+      'ArrowUp',
+      'ArrowDown',
+    ]);
+
+    if (scrollKeys.has(event.key)) {
+      event.preventDefault();
+    }
+  };
+
+  const opts: AddEventListenerOptions = { passive: false, capture: true };
+  window.addEventListener('wheel', blockWheelTouch, opts);
+  window.addEventListener('touchmove', blockWheelTouch, opts);
+  window.addEventListener('keydown', blockKeys, opts);
+
+  const html = document.documentElement;
+  const body = document.body;
+  const prevHtmlOverscroll = html.style.overscrollBehavior;
+  const prevBodyOverscroll = body.style.overscrollBehavior;
+  html.style.overscrollBehavior = 'none';
+  body.style.overscrollBehavior = 'none';
+
+  return () => {
+    window.removeEventListener('wheel', blockWheelTouch, opts);
+    window.removeEventListener('touchmove', blockWheelTouch, opts);
+    window.removeEventListener('keydown', blockKeys, opts);
+    html.style.overscrollBehavior = prevHtmlOverscroll;
+    body.style.overscrollBehavior = prevBodyOverscroll;
+  };
+}

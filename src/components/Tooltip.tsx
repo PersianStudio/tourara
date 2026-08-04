@@ -26,6 +26,7 @@ export function Tooltip(props: TooltipProps) {
     prev,
     close,
     tooltipRef,
+    direction = 'ltr',
     stepContent: {
       title,
       customFooterRenderer,
@@ -44,6 +45,9 @@ export function Tooltip(props: TooltipProps) {
       noStepper,
       corner,
       contentContainerSx,
+      prevLabel,
+      nextLabel,
+      closeLabel,
     },
     stepIndex,
     allSteps,
@@ -51,6 +55,17 @@ export function Tooltip(props: TooltipProps) {
   } = {
     ...props,
   };
+
+  const isRtl = direction === 'rtl';
+  const prevIcon = isRtl ? <ChevronRightIcon /> : <ChevronLeftIcon />;
+  const nextIcon = isRtl ? <ChevronLeftIcon /> : <ChevronRightIcon />;
+  const prevAria = prevLabel || 'Previous step';
+  const nextAria = nextLabel || 'Next step';
+  const closeAria = closeLabel || 'Close tour';
+  const doneLabel = finishBtnText || 'Done';
+  const skipLabel = skipBtnText || 'Skip';
+  const videoLabel = videoBtnText || 'Video';
+  const imageLabel = imageBtnText || 'Image';
 
   const [activePresetSteps, setActivePresetSteps] = React.useState<TourStep[]>([]);
 
@@ -83,6 +98,7 @@ export function Tooltip(props: TooltipProps) {
 
   return (
     <Box
+      dir={direction}
       sx={{
         borderRadius: radius,
         position: 'relative',
@@ -90,6 +106,7 @@ export function Tooltip(props: TooltipProps) {
         bgcolor: 'grey.900',
         color: 'common.white',
         maxWidth: '100%',
+        textAlign: isRtl ? 'right' : 'left',
       }}
     >
       {!(corner === 'none') &&
@@ -133,7 +150,7 @@ export function Tooltip(props: TooltipProps) {
               </Stack>
 
               {!noCloseIcon && (
-                <IconButton onClick={() => close()} size="small" aria-label="Close tour" sx={{ color: 'inherit', p: 0.5 }}>
+                <IconButton onClick={() => close()} size="small" aria-label={closeAria} sx={{ color: 'inherit', p: 0.5 }}>
                   <CloseIcon />
                 </IconButton>
               )}
@@ -178,7 +195,7 @@ export function Tooltip(props: TooltipProps) {
                   '&:hover': { bgcolor: 'grey.600' },
                 }}
               >
-                {videoBtnText || 'Video'}
+                {videoLabel}
               </Button>
             )}
             {image && (
@@ -193,7 +210,7 @@ export function Tooltip(props: TooltipProps) {
                   '&:hover': { bgcolor: 'grey.600' },
                 }}
               >
-                {imageBtnText || 'Image'}
+                {imageLabel}
               </Button>
             )}
           </Stack>
@@ -234,13 +251,13 @@ export function Tooltip(props: TooltipProps) {
             <Stack direction="row" justifyContent="space-between" spacing={1.5} alignItems="center">
               {stepIndex === allSteps.length - 1 ? (
                 <Button variant="contained" size="small" onClick={() => close(true)} sx={{ borderRadius: 1 }}>
-                  {finishBtnText || 'Done'}
+                  {doneLabel}
                 </Button>
               ) : noSkipBtn ? (
                 <Box />
               ) : (
                 <Button variant="contained" size="small" onClick={() => close(true)} sx={{ borderRadius: 1 }}>
-                  {skipBtnText || 'Skip'}
+                  {skipLabel}
                 </Button>
               )}
 
@@ -248,7 +265,7 @@ export function Tooltip(props: TooltipProps) {
                 <IconButton
                   disabled={prevDisabled}
                   onClick={() => prev()}
-                  aria-label="Previous step"
+                  aria-label={prevAria}
                   size="small"
                   sx={{
                     bgcolor: 'grey.700',
@@ -258,12 +275,12 @@ export function Tooltip(props: TooltipProps) {
                     '&.Mui-disabled': { bgcolor: 'grey.800', color: 'grey.600' },
                   }}
                 >
-                  <ChevronLeftIcon />
+                  {prevIcon}
                 </IconButton>
                 <IconButton
                   disabled={nextDisabled}
                   onClick={() => next()}
-                  aria-label="Next step"
+                  aria-label={nextAria}
                   size="small"
                   sx={{
                     bgcolor: 'grey.700',
@@ -273,7 +290,7 @@ export function Tooltip(props: TooltipProps) {
                     '&.Mui-disabled': { bgcolor: 'grey.800', color: 'grey.600' },
                   }}
                 >
-                  <ChevronRightIcon />
+                  {nextIcon}
                 </IconButton>
               </Stack>
             </Stack>

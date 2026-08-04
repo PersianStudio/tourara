@@ -2,6 +2,8 @@
 
 **React product-tour toolkit** — SVG spotlight masks, smart tooltip placement, inactive tip markers, keyboard navigation, and a Zustand-backed host for multi-page apps.
 
+**Languages:** English (default) · [فارسی (README.fa.md)](./README.fa.md)
+
 | | |
 |---|---|
 | **Package** | [`@persianstudio/tourara`](https://www.npmjs.com/package/@persianstudio/tourara) *(npm publish coming soon)* |
@@ -29,12 +31,15 @@ After searching the ecosystem, we could not find a tour component that satisfied
 
 - **Spotlight mask** — full-viewport SVG overlay with a rounded cutout around the target
 - **Smart placement** — 13 cardinal / diagonal orientations; prefers in-view candidates
+- **RTL & LTR** — `direction: 'ltr' | 'rtl'` (default **`ltr`**); east/west preferences mirror in RTL; chrome uses `dir`
 - **Tip markers** — small indicators on other visible steps while the active tooltip is open
 - **Store or controlled** — mount `<TourHost />` + `useTour`, or drive `<Tour />` yourself
 - **Interactive steps** — `customNextFunc`, `nextOnTargetClick`, DOM helpers for open-dropdown / wait-for-element flows
-- **Keyboard** — `Escape` closes, `←` / `→` move between steps
+- **Keyboard** — `Escape` closes; `←` / `→` navigate (swapped in RTL reading order)
 - **MUI-friendly** — default UI uses `@mui/material`; theme via your existing `ThemeProvider`
 - **No router lock-in** — optional `resetKey` instead of a hard `react-router` dependency
+
+Default **copy is English**. Pass your own `finishBtnText` / `skipBtnText` / labels for other locales (see Persian demo on the showcase).
 
 ---
 
@@ -170,6 +175,36 @@ export function Example() {
   );
 }
 ```
+
+---
+
+## RTL & LTR
+
+Default is **`direction: 'ltr'`** with **English** chrome labels.
+
+```tsx
+<Tour
+  direction="rtl"
+  steps={steps}
+  isOpen={open}
+  onClose={() => setOpen(false)}
+  finishBtnText="پایان"
+  skipBtnText="رد کردن"
+  prevLabel="قبلی"
+  nextLabel="بعدی"
+/>
+```
+
+What changes in RTL:
+
+| Concern | Behavior |
+|---------|----------|
+| Chrome | Tooltip / portal set `dir="rtl"` and right-aligned text |
+| Placement | East/west `orientationPreferences` and tip defaults are mirrored |
+| Chevrons | Prev/next icons flip to match reading order |
+| Keyboard | `←` advances, `→` goes back (reading order) |
+
+Pass Persian (or any) strings via label props — the library does **not** auto-translate. See also [README.fa.md](./README.fa.md) and the showcase **RTL / LTR** section.
 
 ---
 

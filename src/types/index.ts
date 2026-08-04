@@ -1,7 +1,10 @@
 import type { SxProps, Theme } from '@mui/material';
 import type { ReactElement, ReactNode } from 'react';
 import type { MaskOptions } from '../components/Mask';
+import type { TourDirection } from '../utils/direction';
 import type { CardinalOrientation, OrientationCoords } from '../utils/positioning';
+
+export type { TourDirection };
 
 export interface TourLogic {
   next: (fromTarget?: boolean) => void;
@@ -13,9 +16,16 @@ export interface TourLogic {
   stepIndex: number;
   allSteps: TourStep[];
   tooltipPosition: OrientationCoords | undefined;
+  /** Active text/layout direction for this tour. */
+  direction: TourDirection;
 }
 
 export interface TourOptions {
+  /**
+   * Text / layout direction. Default `'ltr'`.
+   * In `'rtl'`, east/west placement preferences are mirrored and chrome uses `dir="rtl"`.
+   */
+  direction?: TourDirection;
   disableMaskInteraction?: boolean;
   disableCloseOnClick?: boolean;
   orientationPreferences?: CardinalOrientation[];

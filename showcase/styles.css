@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme='dark'] {
   --bg: #070b14;
   --bg-2: #0c1322;
   --panel: #101826;
@@ -13,6 +14,35 @@
   --danger: #ff5d6c;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --page-bg:
+    radial-gradient(900px 480px at 0% -10%, rgba(59, 130, 246, 0.22), transparent 55%),
+    radial-gradient(700px 420px at 100% 0%, rgba(245, 197, 66, 0.14), transparent 50%),
+    linear-gradient(180deg, #070b14 0%, #0a1020 45%, #070b14 100%);
+  --code-bg: #060a12;
+  --code-bar: #0d1524;
+  --code-fg: #d7e4ff;
+}
+
+[data-theme='light'] {
+  --bg: #f4f7fc;
+  --bg-2: #e8eef8;
+  --panel: #ffffff;
+  --panel-2: #f1f5fb;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: rgba(15, 23, 42, 0.12);
+  --blue: #2563eb;
+  --blue-deep: #1d4ed8;
+  --yellow: #c99200;
+  --yellow-deep: #a67c00;
+  --danger: #dc2626;
+  --page-bg:
+    radial-gradient(900px 480px at 0% -10%, rgba(37, 99, 235, 0.12), transparent 55%),
+    radial-gradient(700px 420px at 100% 0%, rgba(201, 146, 0, 0.1), transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #eef3fb 45%, #f4f7fc 100%);
+  --code-bg: #0f172a;
+  --code-bar: #1e293b;
+  --code-fg: #e2e8f0;
 }
 
 * {
@@ -32,13 +62,11 @@ html {
 body {
   margin: 0;
   color: var(--ink);
-  background:
-    radial-gradient(900px 480px at 0% -10%, rgba(59, 130, 246, 0.22), transparent 55%),
-    radial-gradient(700px 420px at 100% 0%, rgba(245, 197, 66, 0.14), transparent 50%),
-    linear-gradient(180deg, #070b14 0%, #0a1020 45%, #070b14 100%);
+  background: var(--page-bg);
   font-family: var(--sans);
   font-size: 15px;
   line-height: 1.55;
+  transition: background 200ms ease, color 200ms ease;
 }
 
 @keyframes rise {
@@ -693,7 +721,7 @@ body {
 .code-editor {
   border: 1px solid rgba(96, 165, 250, 0.2);
   overflow: hidden;
-  background: #060a12;
+  background: var(--code-bg);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
 }
 
@@ -703,7 +731,7 @@ body {
   align-items: center;
   gap: 0.55rem;
   padding: 0.45rem 0.6rem;
-  background: #0d1524;
+  background: var(--code-bar);
   border-bottom: 1px solid rgba(96, 165, 250, 0.12);
 }
 
@@ -772,7 +800,7 @@ body {
   padding: 0.85rem 0.9rem;
   overflow: auto;
   max-height: 280px;
-  color: #d7e4ff;
+  color: var(--code-fg);
   font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1.55;
@@ -1012,4 +1040,98 @@ code {
   color: var(--muted);
   font-size: 0.85rem;
   line-height: 1.45;
+}
+
+.rtl-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.rtl-switch {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  background: rgba(7, 11, 20, 0.65);
+}
+
+.rtl-switch button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.rtl-switch button.is-active {
+  background: rgba(59, 130, 246, 0.22);
+  color: #93c5fd;
+}
+
+.rtl-shell {
+  border: 1px solid var(--line);
+  background: rgba(16, 24, 38, 0.92);
+  overflow: hidden;
+}
+
+.rtl-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(245, 197, 66, 0.1), rgba(59, 130, 246, 0.1));
+}
+
+.rtl-top span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.rtl-body {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  min-height: 180px;
+}
+
+@media (max-width: 640px) {
+  .rtl-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rtl-side {
+  padding: 0.55rem;
+  border-inline-end: 1px solid var(--line);
+  background: rgba(7, 11, 20, 0.45);
+  display: grid;
+  gap: 0.2rem;
+  align-content: start;
+}
+
+.rtl-side button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  padding: 0.5rem 0.55rem;
+  cursor: pointer;
+}
+
+.rtl-side button.is-active,
+.rtl-side button:hover {
+  background: rgba(59, 130, 246, 0.16);
+}
+
+.rtl-body .panel {
+  margin: 0.65rem;
 }

@@ -14,6 +14,7 @@ import {
   setTourUpdateListener,
   shouldUpdate as utilShouldUpdate,
 } from '../utils/tour';
+import { resolveOrientationPreferences } from '../utils/direction';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTargetPosition = utilGetTargetPosition as any;
@@ -74,6 +75,7 @@ export const useUpdateTour = ({
     allowForeignTarget,
     nextOnTargetClick,
     validateNextOnTargetClick,
+    direction = 'ltr',
   } = options;
 
   const root: Element | undefined = tourRoot;
@@ -117,12 +119,14 @@ export const useUpdateTour = ({
     const currentTargetDims: Dims | undefined = getElementDims(currentTarget || undefined);
     const smartPadding: number = disableMask ? 0 : maskPadding || 0;
 
+    const resolvedPreferences = resolveOrientationPreferences(orientationPreferences, direction);
+
     const tooltipPosition: OrientationCoords = getTooltipPosition({
       target: currentTarget,
       tooltip: tooltipContainer,
       padding: smartPadding,
       tooltipSeparation,
-      orientationPreferences,
+      orientationPreferences: resolvedPreferences,
       root,
       getPositionFromCandidates,
       disableAutoScroll,
@@ -154,7 +158,7 @@ export const useUpdateTour = ({
             allowForeignTarget,
             selector,
             getPositionFromCandidates,
-            orientationPreferences,
+            orientationPreferences: resolvedPreferences,
             padding: smartPadding,
             tooltipSeparation,
           })

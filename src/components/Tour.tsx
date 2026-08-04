@@ -13,6 +13,7 @@ import {
 } from '../utils/dom';
 import type { OrientationCoords } from '../utils/positioning';
 import { getIdString } from '../utils/tour';
+import { lockUserScroll } from '../utils/scrollLock';
 import { Mask } from './Mask';
 import { Tip } from './Tip';
 import { Tooltip } from './Tooltip';
@@ -67,6 +68,7 @@ export const Tour = (props: TourProps) => {
     identifier,
     disableMask,
     renderMask,
+    direction = 'ltr',
   } = options;
 
   useEffect(() => {
@@ -166,6 +168,7 @@ export const Tour = (props: TourProps) => {
     stepIndex: currentStepIndex,
     allSteps: steps,
     tooltipPosition,
+    direction,
   };
 
   const tourLogic: TourLogic = {
@@ -215,14 +218,8 @@ export const Tour = (props: TourProps) => {
   }, [tourOpen, tourRoot, rootSelector]);
 
   React.useEffect(() => {
-    // Do not lock body scroll — programmatic scrollIntoView / scrollTo must work
-    // while the tour is open. The mask already captures pointer interaction.
     if (!tourOpen) return;
-    const prev = document.body.style.overscrollBehavior;
-    document.body.style.overscrollBehavior = 'none';
-    return () => {
-      document.body.style.overscrollBehavior = prev;
-    };
+    return lockUserScroll();
   }, [tourOpen]);
 
   const { updateTour } = useUpdateTour({
@@ -282,6 +279,13 @@ export const Tour = (props: TourProps) => {
   const MaskTag = renderMask ? renderMask : Mask;
 
   const keyPressHandler = (event: React.KeyboardEvent) => {
+    const goNext = () => {
+      if (!disableNext) tourLogic.next();
+    };
+    const goPrev = () => {
+      if (!disablePrev) tourLogic.prev();
+    };
+
     switch (event.key) {
       case 'Escape':
         event.preventDefault();
@@ -291,15 +295,12 @@ export const Tour = (props: TourProps) => {
         break;
       case 'ArrowRight':
         event.preventDefault();
-        if (!disableNext) {
-          tourLogic.next();
-        }
+        // RTL: right arrow steps backward (reading order)
+        direction === 'rtl' ? goPrev() : goNext();
         break;
       case 'ArrowLeft':
         event.preventDefault();
-        if (!disablePrev) {
-          tourLogic.prev();
-        }
+        direction === 'rtl' ? goNext() : goPrev();
         break;
     }
   };
@@ -336,7 +337,7 @@ export const Tour = (props: TourProps) => {
   };
 
   const render = () => (
-    <Box ref={portal} id={getIdString(basePortalString, identifier)} sx={portalStyle}>
+    <Box ref={portal} id={getIdString(basePortalString, identifier)} sx={portalStyle} dir={direction}>
       {tourRoot && (
         <MaskTag
           maskId={getIdString(baseMaskString, identifier)}
@@ -358,6 +359,7 @@ export const Tour = (props: TourProps) => {
           sx={tooltipContainerStyle}
           onKeyDown={keyPressHandler}
           tabIndex={0}
+          dir={direction}
         >
           {customTooltipRenderer ? customTooltipRenderer(tourLogic) : <Tooltip {...tourLogic} tooltipRef={tooltip} />}
         </Box>
@@ -373,6 +375,7 @@ export const Tour = (props: TourProps) => {
             goToStep={goToStep}
             activeIndex={currentStepIndex}
             containerRoot={tourRoot}
+            direction={direction}
           />
         ))}
     </Box>

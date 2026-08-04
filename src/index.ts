@@ -7,7 +7,7 @@ export { Tooltip } from './components/Tooltip';
 export { Tip } from './components/Tip';
 
 export { tourDefaultProps } from './constants';
-export type { TourStep, TourLogic, TourOptions, TourProps } from './types';
+export type { TourStep, TourLogic, TourOptions, TourProps, TourDirection } from './types';
 
 export { useTour, useUpdateTour, useDetectVisibility } from './hooks';
 export type { UseTourOptions } from './hooks/useTour';
@@ -17,6 +17,11 @@ export type { TourState } from './store/tourStore';
 
 export { CardinalOrientation } from './utils/positioning';
 export type { Coords, Dims, ElementInfo } from './utils/dom';
+export {
+  mirrorOrientation,
+  resolveOrientationPreferences,
+  defaultTipOrientations,
+} from './utils/direction';
 export {
   waitForElement,
   isElementPresent,

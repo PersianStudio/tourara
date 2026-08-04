@@ -1,17 +1,22 @@
-import { TourHost, useTour, useTourStore } from '@persianstudio/tourara';
+import { useState } from 'react';
+import { TourHost, useTour, useTourStore, type TourDirection, type TourStep } from '@persianstudio/tourara';
 import { CapabilityGrid } from './demo/CapabilityGrid';
 import { ControlledDemo } from './demo/ControlledDemo';
 import { CustomUIShowcase } from './demo/CustomUIShowcase';
 import { DemoApp } from './demo/DemoApp';
+import { RtlDemo } from './demo/RtlDemo';
 import { SetupGuide } from './demo/SetupGuide';
 import { WhyBuilt } from './demo/WhyBuilt';
+import { RTL_TOUR_STEPS } from './demo/rtlTourSteps';
 import { CUSTOM_UI_TOUR_STEPS, MAIN_TOUR_STEPS, SETUP_TOUR_STEPS } from './demo/tourSteps';
+import { useColorMode } from './theme';
 
 const TOUR_BASE = {
   maskPadding: 6,
   maskRadius: 2,
   corner: 'small' as const,
   tooltipBorderRadius: 1,
+  direction: 'ltr' as TourDirection,
 };
 
 function TourBootstrap() {
@@ -30,28 +35,37 @@ function TourBootstrap() {
 export function App() {
   const { setTourProps, tourProps } = useTourStore();
   const tourRunning = Boolean(tourProps.isOpen);
+  const [demoDirection, setDemoDirection] = useState<TourDirection>('ltr');
+  const { mode, toggleMode } = useColorMode();
 
-  const startTour = (steps = MAIN_TOUR_STEPS) => {
+  const startTour = (steps: TourStep[] = MAIN_TOUR_STEPS, direction: TourDirection = 'ltr') => {
     setTourProps({
       steps,
       isOpen: true,
       ...TOUR_BASE,
+      direction,
     });
   };
 
   const startMainTour = () => {
-    startTour(MAIN_TOUR_STEPS);
+    startTour(MAIN_TOUR_STEPS, 'ltr');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const startSetupTour = () => {
     document.getElementById('setup')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.setTimeout(() => startTour(SETUP_TOUR_STEPS), 350);
+    window.setTimeout(() => startTour(SETUP_TOUR_STEPS, 'ltr'), 350);
   };
 
   const startCustomUiTour = () => {
     document.getElementById('custom-ui')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.setTimeout(() => startTour(CUSTOM_UI_TOUR_STEPS), 350);
+    window.setTimeout(() => startTour(CUSTOM_UI_TOUR_STEPS, 'ltr'), 350);
+  };
+
+  const startRtlTour = () => {
+    setDemoDirection('rtl');
+    document.getElementById('rtl')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => startTour(RTL_TOUR_STEPS, 'rtl'), 350);
   };
 
   return (
@@ -67,15 +81,21 @@ export function App() {
         <p className="hero-kicker">Persian Studio · docs + playground</p>
         <h1 className="brand">tourara</h1>
         <p className="hero-lead">
-          Product tours for React — SVG masks, tip markers, auto-scroll, interactive steps, and render slots. High
-          contrast. Low chrome. Built to document itself.
+          Product tours for React — SVG masks, tip markers, auto-scroll, interactive steps, RTL/LTR, and render slots.
+          Defaults stay English and LTR.
         </p>
         <div className="hero-actions">
           <button type="button" className="btn btn-primary" data-tour="start-tour" onClick={startMainTour}>
             {tourRunning ? 'Tour running…' : 'Start full tour'}
           </button>
+          <button type="button" className="btn btn-ghost" onClick={toggleMode} aria-label="Toggle color mode">
+            {mode === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
           <a className="btn btn-ghost" href="#why">
             Why we built it
+          </a>
+          <a className="btn btn-ghost" href="#rtl">
+            RTL / LTR
           </a>
           <a className="btn btn-ghost" href="#setup">
             Setup guide
@@ -85,9 +105,9 @@ export function App() {
           </a>
         </div>
         <ul className="hero-meta">
+          <li>ltr default</li>
+          <li>rtl ready</li>
           <li>auto-scroll</li>
-          <li>Esc · ← →</li>
-          <li>MUI peer</li>
           <li>slots</li>
         </ul>
       </header>
@@ -95,6 +115,12 @@ export function App() {
       <WhyBuilt />
 
       <DemoApp onStartTour={startMainTour} tourRunning={tourRunning} />
+
+      <RtlDemo
+        direction={demoDirection}
+        onDirectionChange={setDemoDirection}
+        onStartRtlTour={startRtlTour}
+      />
 
       <CapabilityGrid />
 
@@ -130,8 +156,9 @@ export function App() {
       <footer className="footer">
         <span>Persian Studio · MIT</span>
         <a href="#why">Why</a>
+        <a href="#rtl">RTL</a>
         <a href="#setup">Setup</a>
-        <a href="#custom-ui">Custom UI</a>
+        <a href="https://github.com/PersianStudio/tourara/blob/main/README.fa.md">فارسی</a>
         <a href="https://github.com/PersianStudio/tourara">GitHub</a>
       </footer>
     </div>

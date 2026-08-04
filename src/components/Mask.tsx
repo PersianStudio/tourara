@@ -140,7 +140,7 @@ export function Mask(props: MaskOptions) {
         <path
           d={getBorderPath(targetInfo)}
           stroke={isDark ? '#fff' : '#000'}
-          strokeWidth={1}
+          strokeWidth={1.5}
           fill="none"
           pointerEvents="none"
         />
@@ -153,7 +153,7 @@ export function Mask(props: MaskOptions) {
         width={containerWidth}
         height={containerHeight}
         fill={isDark ? '#fff' : '#000'}
-        fillOpacity={isDark ? 0.2 : 0.5}
+        fillOpacity={isDark ? 0.12 : 0.32}
         pointerEvents="auto"
         clipPath={targetInfo ? `url(#${pathId})` : undefined}
       />

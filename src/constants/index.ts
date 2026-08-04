@@ -1,6 +1,7 @@
 import { TourProps } from '../types';
 
 export const tourDefaultProps: Partial<TourProps> = {
+  direction: 'ltr',
   maskPadding: 5,
   maskRadius: 2,
   tooltipSeparation: 8,
