@@ -1,9 +1,8 @@
 /**
- * Active-step tooltip chrome: header, body, footer, optional corner graphic.
- * Plain HTML + CSS — no MUI.
+ * Active-step tooltip chrome with a geometry-aligned caret that points
+ * exactly at the spotlight focus border.
  */
 import * as React from 'react';
-import { TourTooltipCorner } from '../../assets/TourTooltipCorner';
 import { ChevronLeftIcon, ChevronRightIcon } from '../../icons';
 import type { TourLogic } from '../../types';
 import { CardinalOrientation } from '../../utils/positioning';
@@ -11,8 +10,9 @@ import { TooltipBody } from './TooltipBody';
 import { TooltipFooter } from './TooltipFooter';
 import { TooltipHeader } from './TooltipHeader';
 import { TooltipMediaButtons } from './TooltipMediaButtons';
+import { TooltipPointer } from './TooltipPointer';
 import { TooltipStepper } from './TooltipStepper';
-import { useTooltipCornerStyles } from './useTooltipCornerStyles';
+import { useTooltipPointer } from './useTooltipPointer';
 
 interface TooltipProps extends TourLogic {
   tooltipRef: React.MutableRefObject<HTMLElement | undefined>;
@@ -23,7 +23,6 @@ export function Tooltip(props: TooltipProps) {
     next,
     prev,
     close,
-    tooltipRef,
     direction = 'ltr',
     stepContent: {
       title,
@@ -46,11 +45,16 @@ export function Tooltip(props: TooltipProps) {
       prevLabel,
       nextLabel,
       closeLabel,
+      maskPadding,
+      tooltipSeparation,
     },
     stepIndex,
     allSteps,
     tooltipPosition,
   } = props;
+
+  // Measure the card itself (not the positioned shell) so caret offsets match.
+  const cardRef = React.useRef<HTMLDivElement>(null);
 
   const isRtl = direction === 'rtl';
   const prevIcon = isRtl ? <ChevronRightIcon /> : <ChevronLeftIcon />;
@@ -63,38 +67,29 @@ export function Tooltip(props: TooltipProps) {
   const videoLabel = videoBtnText || 'Video';
   const imageLabel = imageBtnText || 'Image';
 
-  const cornerStyles = useTooltipCornerStyles({
+  const pointer = useTooltipPointer({
     tooltipPosition,
     stepIndex,
     allSteps,
-    tooltipRef,
+    cardRef,
     corner,
+    maskPadding,
+    tooltipSeparation,
   });
 
   const prevDisabled = stepIndex - 1 < 0;
   const nextDisabled = stepIndex + 1 >= allSteps.length;
   const radius = tooltipBorderRadius ?? 8;
 
+  const showPointer =
+    corner !== 'none' &&
+    pointer &&
+    tooltipPosition?.orientation &&
+    tooltipPosition.orientation !== CardinalOrientation.CENTER;
+
   return (
-    <div
-      className="tourara-tooltip"
-      dir={direction}
-      style={{
-        borderRadius: radius,
-        ...cornerStyles?.style,
-      }}
-    >
-      {!(corner === 'none') &&
-        tooltipPosition?.orientation &&
-        tooltipPosition.orientation !== CardinalOrientation.CENTER &&
-        tooltipPosition.orientation !== CardinalOrientation.EAST &&
-        tooltipPosition.orientation !== CardinalOrientation.NORTH &&
-        tooltipPosition.orientation !== CardinalOrientation.SOUTH &&
-        tooltipPosition.orientation !== CardinalOrientation.WEST && (
-          <div className="tourara-tooltip-corner" style={cornerStyles?.svgStyle}>
-            <TourTooltipCorner />
-          </div>
-        )}
+    <div ref={cardRef} className="tourara-tooltip" dir={direction} style={{ borderRadius: radius }}>
+      {showPointer && pointer ? <TooltipPointer placement={pointer} /> : null}
 
       <TooltipHeader
         tourLogic={props}

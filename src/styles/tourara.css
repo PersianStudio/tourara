@@ -37,6 +37,7 @@
   width: max-content;
   min-width: min(260px, calc(100vw - 24px));
   max-width: min(400px, calc(100vw - 24px));
+  overflow: visible;
 }
 
 .tourara-tooltip {
@@ -46,6 +47,7 @@
   border-radius: var(--tourara-radius);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   max-width: 100%;
+  overflow: visible;
 }
 
 .tourara-tooltip[dir='rtl'] {
@@ -54,6 +56,12 @@
 
 .tourara-tooltip[dir='ltr'] {
   text-align: left;
+}
+
+.tourara-tooltip-pointer {
+  position: absolute;
+  z-index: 10002;
+  pointer-events: none;
 }
 
 .tourara-tooltip-corner {
