@@ -69,7 +69,9 @@ Inactive tip markers are placed by `TipLayer` in one pass. Placement avoids:
 
 If no clear slot exists, that tip is **hidden** rather than drawn over the tour.
 
-**Perf:** no polling interval; scroll/resize coalesced to one rAF; at most 6 tips; `disableTips` skips the layer entirely.
+**Performance:** no polling interval; scroll/resize coalesced to one rAF; at most 6 tips; `disableTips` skips the layer entirely.
+
+The active tooltip uses a **geometry caret** (not a decorative SVG): it aims at the nearest point on the padded focus rect so the tip meets the mask stroke. Hide with `corner: 'none'`.
 
 ## Performance model
 

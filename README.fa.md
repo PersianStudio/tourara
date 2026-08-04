@@ -1,6 +1,6 @@
 # tourara
 
-**جعبه ابزار تور محصول برای React** — ماسک SVG، جایگذاری هوشمند تولتیپ، نشانگر tip، ناوبری صفحه‌کلید، و میزبان مبتنی بر Zustand برای اپ‌های چندصفحه‌ای.
+**جعبه ابزار تور محصول برای React** — ماسک SVG، جایگذاری هوشمند تولتیپ، نشانگر tip، ناوبری صفحه‌کلید، و میزبان مبتنی بر Context برای اپ‌های چندصفحه‌ای. همتایان فقط React (بدون MUI و Zustand).
 
 **زبان‌ها:** [English (README.md)](./README.md) · فارسی (همین سند)
 
@@ -143,7 +143,18 @@ pnpm build
 pnpm build:showcase
 ```
 
-مستندات مشارکت‌کنندگان (معماری، API، مشارکت) در پوشهٔ [`docs/`](./docs/) است.
+مستندات مشارکت‌کنندگان (معماری، API، مشارکت، انتشار npm) در پوشهٔ [`docs/`](./docs/) است — به‌ویژه [docs/PUBLISHING.md](./docs/PUBLISHING.md).
+
+---
+
+## انتشار روی npm
+
+```bash
+pnpm typecheck && pnpm build && pnpm pack:check
+pnpm publish --access public
+```
+
+همتایان (peers) فقط `react` و `react-dom` هستند.
 
 ---
 

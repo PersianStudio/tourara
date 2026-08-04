@@ -16,7 +16,6 @@ export {
   TourProvider,
   useTourContext,
   useTourStore,
-  createTourStore,
 } from './context/TourContext';
 export type { TourState, TourContextValue, TourProviderProps } from './context/TourContext';
 

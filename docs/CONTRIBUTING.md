@@ -4,7 +4,7 @@ Thanks for helping improve tourara. This guide keeps the codebase easy to evolve
 
 ## Prerequisites
 
-- Node 20+ (CI uses 22)
+- Node 18+ (CI uses 22)
 - pnpm 9 (`packageManager` in `package.json`)
 
 ```bash
@@ -13,6 +13,7 @@ pnpm dev            # showcase
 pnpm typecheck
 pnpm build          # library → dist/
 pnpm build:showcase # Pages bundle
+pnpm pack:check     # dry-run npm tarball
 ```
 
 ## Principles
@@ -22,20 +23,24 @@ pnpm build:showcase # Pages bundle
 3. **Pure helpers** — geometry / path / placement logic stays free of React when possible.
 4. **Comment the why** — short file headers + non-obvious function JSDoc.
 5. **Defaults stay English + LTR** — localization is caller-owned via props.
-6. **Match existing patterns** — MUI `sx`, Zustand store for host mode, fixed portal coords.
+6. **Zero UI peers** — library chrome is HTML/CSS + CSS variables; MUI stays in `showcase/` only.
+7. **Context for host mode** — `TourProvider` / `useTourContext` (no Zustand).
+8. **Match existing patterns** — fixed portal viewport coords, geometry-first pointer, rAF-throttled tips.
 
 ## Where to change what
 
 | Goal | Start here |
 |------|------------|
-| Tooltip UI | `src/components/Tooltip/` |
+| Tooltip UI / caret | `src/components/Tooltip/` |
 | Tip markers | `src/components/Tip/` |
 | Mask / cutout | `src/components/Mask/` |
 | Step flow / keyboard | `src/components/Tour/` |
+| Shared tour state | `src/context/TourContext.tsx` |
 | Placement math | `src/utils/positioning/` |
 | Update loop | `src/hooks/useUpdateTour/` |
-| Store / useTour | `src/store/`, `src/hooks/useTour.tsx` |
+| Default styles | `src/styles/tourara.css` |
 | Demo pages | `showcase/demo/`, `showcase/sections/` |
+| npm release | [PUBLISHING.md](./PUBLISHING.md) |
 
 ## Pull requests
 
@@ -47,8 +52,12 @@ pnpm build:showcase # Pages bundle
 ## Code style
 
 - TypeScript strict; avoid new `any` unless matching legacy `@ts-nocheck` geometry files.
-- Named exports for components; default only when matching an existing pattern (`TourHost` historically named).
-- No new dependencies without a clear need (keep the package lean).
+- Named exports for components.
+- No new runtime dependencies without a clear need (keep the package lean — peers are React only).
+
+## Publishing
+
+Maintainers: follow [PUBLISHING.md](./PUBLISHING.md) end-to-end before `pnpm publish`.
 
 ## License
 

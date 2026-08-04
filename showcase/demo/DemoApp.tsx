@@ -124,7 +124,7 @@ export function DemoApp({ onStartTour, tourRunning }: DemoAppProps) {
             <article className="panel" data-tour="orient-north">
               <p className="eyebrow">Placement</p>
               <h3>Orientation prefs</h3>
-              <p>Bias the tooltip south / southeast of this card with decorative corners on diagonals.</p>
+              <p>Bias the tooltip south of this card. The caret aims at the spotlight border.</p>
               <div className="chip-row">
                 <span className="chip">south</span>
                 <span className="chip">south-east</span>

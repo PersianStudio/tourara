@@ -26,6 +26,9 @@ import {
   defaultTipOrientations,
 } from '@persianstudio/tourara';
 
+// optional if you prefer a static stylesheet instead of runtime inject:
+import '@persianstudio/tourara/styles.css';
+
 import type {
   TourProps,
   TourStep,
@@ -33,6 +36,8 @@ import type {
   TourLogic,
   TourDirection,
   TourState,
+  TourContextValue,
+  TourProviderProps,
   MaskOptions,
   Coords,
   Dims,
@@ -47,7 +52,7 @@ import type {
 | `TourProvider` | Context | Required for host / `useTour` / `useTourContext` |
 | `Tour` | Controlled | Pass `isOpen`, `steps`, prefer `onClose` (no provider needed) |
 | `TourHost` | Context-bound | Mount once under provider; pages call `useTour` / `setTourProps` |
-| `Tooltip` | Default chrome | Plain HTML/CSS; replace via `customTooltipRenderer` |
+| `Tooltip` | Default chrome | HTML/CSS + geometry caret; replace via `customTooltipRenderer` |
 | `Tip` | Markers | Inactive steps; viewport-fixed |
 | `Mask` | Overlay | Replace via `renderMask` |
 
@@ -68,10 +73,10 @@ import type {
 | Mask | `maskPadding`, `maskRadius`, `disableMask`, `renderMask` |
 | Tips | `disableTips`, `tipOrientationPreferences` |
 | Placement | `orientationPreferences`, `tooltipSeparation` |
-| Chrome | `noFooter`, `noStepper`, `finishBtnText`, `skipBtnText`, `corner` |
+| Chrome | `corner` (`'small'` caret / `'none'`), `noFooter`, `finishBtnText` |
 | Style | `tooltipContainerStyle`, `contentContainerStyle`, CSS variables |
 | Slots | `customTooltipRenderer`, `customFooterRenderer`, `customNextFunc` |
-| Behavior | `nextOnTargetClick`, `movingTarget`, `updateInterval` (≥200ms), `disableAutoScroll`, `allowForeignTarget` |
+| Behavior | `nextOnTargetClick`, `movingTarget`, `updateInterval` (≥200ms), `disableAutoScroll` |
 
 ## DOM helpers
 
@@ -85,3 +90,7 @@ import type {
 ## Defaults
 
 See `tourDefaultProps` in `src/constants/`. Override per tour or per step; step wins over tour props when merged.
+
+## Publishing
+
+See [PUBLISHING.md](./PUBLISHING.md).

@@ -83,11 +83,4 @@ export function useTourContext(): TourContextValue {
  */
 export const useTourStore = useTourContext;
 
-/** @deprecated Zustand factory removed — wrap with `<TourProvider initialProps={…}>` instead. */
-export function createTourStore(_initial?: Partial<TourProps>): never {
-  throw new Error(
-    'createTourStore was removed. Wrap your tree in <TourProvider initialProps={…}> instead.',
-  );
-}
-
 export type TourState = TourContextValue;

@@ -3,7 +3,7 @@
  * Individual demos live under `./demo/` so this file stays orchestration-only.
  */
 import { useState } from 'react';
-import { TourHost, useTour, useTourStore, type TourDirection, type TourStep } from '@persianstudio/tourara';
+import { TourHost, useTour, useTourContext, type TourDirection, type TourStep } from '@persianstudio/tourara';
 import { CapabilityGrid } from './demo/CapabilityGrid';
 import { ControlledDemo } from './demo/ControlledDemo';
 import { CustomUIShowcase } from './demo/CustomUIShowcase';
@@ -41,7 +41,7 @@ function TourBootstrap() {
 }
 
 export function App() {
-  const { setTourProps, tourProps } = useTourStore();
+  const { setTourProps, tourProps } = useTourContext();
   const tourRunning = Boolean(tourProps.isOpen);
   const [demoDirection, setDemoDirection] = useState<TourDirection>('ltr');
   const { mode, toggleMode } = useColorMode();

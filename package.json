@@ -18,14 +18,20 @@
     "onboarding",
     "walkthrough",
     "tooltip",
-    "product-tour"
+    "product-tour",
+    "spotlight",
+    "rtl"
   ],
   "type": "module",
   "sideEffects": [
     "**/*.css"
   ],
   "files": [
-    "dist"
+    "dist",
+    "LICENSE",
+    "README.md",
+    "README.fa.md",
+    "CHANGELOG.md"
   ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -41,18 +47,24 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite --config vite.showcase.config.ts",
-    "build": "vite build && tsc -p tsconfig.lib.json --emitDeclarationOnly && cp src/styles/tourara.css dist/tourara.css",
+    "clean": "rm -rf dist showcase-dist",
+    "typecheck": "tsc -p tsconfig.lib.json --noEmit",
+    "build": "pnpm clean && vite build && cp src/styles/tourara.css dist/tourara.css",
     "build:showcase": "vite build --config vite.showcase.config.ts",
     "preview": "vite preview --config vite.showcase.config.ts",
-    "typecheck": "tsc -p tsconfig.lib.json --noEmit"
+    "prepack": "pnpm typecheck && pnpm build",
+    "pack:check": "npm pack --dry-run",
+    "prepublishOnly": "pnpm typecheck && pnpm build"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
-  "dependencies": {},
   "devDependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",

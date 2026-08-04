@@ -7,8 +7,9 @@ Internal documentation for **tourara** contributors and maintainers.
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | How the library is layered |
 | [API.md](./API.md) | Export map & option groups |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Local setup, PR habits, principles |
+| [PUBLISHING.md](./PUBLISHING.md) | npm release checklist |
 
 End-user guides stay at the repo root:
 
-- [README.md](../README.md) — English
+- [README.md](../README.md) — English (install, API, theming, short publish blurb)
 - [README.fa.md](../README.fa.md) — فارسی

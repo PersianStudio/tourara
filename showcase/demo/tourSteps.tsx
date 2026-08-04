@@ -133,7 +133,7 @@ export const MAIN_TOUR_STEPS: TourStep[] = [
   {
     selector: '[data-tour="orient-north"]',
     title: 'Preferred orientation',
-    content: 'orientationPreferences bias placement (here: south of the chip). Diagonals get the decorative corner.',
+    content: 'orientationPreferences bias placement (here: south of the chip). The caret aims at the focus border.',
     orientationPreferences: [CardinalOrientation.SOUTH, CardinalOrientation.SOUTHEAST, CardinalOrientation.SOUTHWEST],
     corner: 'small',
   },

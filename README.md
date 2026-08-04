@@ -242,13 +242,12 @@ Missing selectors are **skipped** when navigating next/prev so tours stay robust
 | `Tooltip` | Default step chrome (title, content, stepper, footer). |
 | `Tip` | Inactive-step marker near other visible targets. |
 
-### Hooks & store
+### Hooks & context
 
 | Export | Description |
 |--------|-------------|
-| `useTour({ tourOptions, delay?, openImmediately? })` | Writes `tourOptions` into the store on mount (after `delay` ms, default `100`). Returns `{ tourProps, setTourProps }`. |
+| `useTour({ tourOptions, delay?, openImmediately? })` | Writes `tourOptions` into context on mount (after `delay` ms, default `100`). Returns `{ tourProps, setTourProps }`. Requires `TourProvider`. |
 | `useTourContext` / `useTourStore` | Context API: `{ tourProps, setTourProps }` (`useTourStore` is an alias). |
-| `createTourStore(initial?)` | Factory for an isolated store instance (advanced). |
 | `useUpdateTour` / `useDetectVisibility` | Internal positioning / visibility hooks (exported for advanced forks). |
 
 ### Helpers
@@ -270,7 +269,7 @@ Missing selectors are **skipped** when navigating next/prev so tours stay robust
 
 ## Options
 
-Options can be set on the **tour** (`Tour` / store props) and **overridden per step**.
+Options can be set on the **tour** (`Tour` / context props) and **overridden per step**.
 
 ### Content & chrome
 
@@ -282,7 +281,7 @@ Options can be set on the **tour** (`Tour` / store props) and **overridden per s
 | `finishBtnText` | `string` | Last-step primary button (default `"Done"`). |
 | `skipBtnText` | `string` | Skip label (default `"Skip"`). |
 | `noFooter` / `noCloseIcon` / `noSkipBtn` / `noStepper` | `boolean` | Hide parts of the default tooltip. |
-| `corner` | `'none' \| 'small'` | Decorative corner SVG on diagonal placements. |
+| `corner` | `'none' \| 'small'` | Geometry caret aimed at the focus border (`'none'` hides it). |
 | `audio` / `video` / `image` | `boolean` | Show media affordance buttons in the default tooltip. |
 | `videoBtnText` / `imageBtnText` | `string` | Labels for those buttons. |
 
@@ -290,23 +289,22 @@ Options can be set on the **tour** (`Tour` / store props) and **overridden per s
 
 | Option | Default | Notes |
 |--------|---------|--------|
-| `maskPadding` | `5` | Gap around the cutout. |
+| `maskPadding` | `5` | Gap around the cutout (also used as the caret aim rect). |
 | `maskRadius` | `2` | Cutout corner radius. |
 | `disableMask` | `false` | Hide the overlay. |
 | `disableTips` | `false` | Skip inactive tip markers (cheapest tip mode). |
 | `disableMaskInteraction` | `false` | When `true`, mask captures pointer events more aggressively. |
 | `disableCloseOnClick` | `false` | Don’t close when clicking the dimmed area. |
-| `tooltipMaxWidth` | responsive | Number, string, or MUI breakpoint map. |
-| `tooltipSeparation` | `0` | Extra distance from the target. |
-| `tooltipBorderRadius` | — | Tooltip radius (MUI spacing units in default UI). |
+| `tooltipMaxWidth` | `min(400px, 100vw-24px)` | Number (px) or CSS length string. |
+| `tooltipSeparation` | `10` | Gap from focus border; caret length matches this. |
+| `tooltipBorderRadius` | `8` | Tooltip card radius in **px**. |
 | `tooltipContainerStyle` / `contentContainerStyle` | — | Plain React `CSSProperties` overrides. |
-| `disableTips` | `false` | Skip inactive tip markers. |
-| `transition` | `top/left 300ms ease` | Tooltip move transition. |
+| `transition` | `top/left 160ms ease` | Tooltip move transition. |
 | `zIndex` | `10000` | Portal stacking. |
 | `rootSelector` | — | Scroll / portal root; otherwise nearest scroll ancestor. |
 | `allowForeignTarget` | `true` | Allow targets outside the tour root. |
 | `disableAutoScroll` / `disableSmoothScroll` | `false` | Scroll behavior. |
-| `movingTarget` | — | Poll for targets that move/resize. |
+| `movingTarget` | — | Poll for targets that move/resize (interval floored at 200ms). |
 | `updateInterval` / `renderTolerance` | `500` / `2` | Update cadence / drift tolerance. |
 
 ### Placement
@@ -403,13 +401,27 @@ While open, `document.body` scroll is locked. Focus returns to the last target o
 
 ## Theming
 
-Tourara reads the ambient MUI theme:
+Default chrome is plain HTML/CSS. Styles inject automatically when `TourProvider` or `Tour` mounts. Optional stylesheet:
 
-- Mask stroke/fill follow `palette.mode` (light vs dark)
-- Tip markers use `palette.primary`
-- Default tooltip uses neutral `grey.*` surfaces
+```ts
+import '@persianstudio/tourara/styles.css';
+```
 
-Override appearance with CSS variables (`--tourara-accent`, `--tourara-bg`, …), `tooltipContainerStyle` / `contentContainerStyle`, or `customTooltipRenderer` / `renderMask` without forking the package.
+Override with CSS variables on `:root` or a parent:
+
+| Variable | Role |
+|----------|------|
+| `--tourara-bg` | Tooltip surface |
+| `--tourara-fg` | Tooltip text |
+| `--tourara-accent` | Primary buttons + tip markers |
+| `--tourara-accent-contrast` | Text on accent |
+| `--tourara-warning` | Active stepper pill |
+| `--tourara-border` / `--tourara-surface` | Dividers / ghost buttons |
+| `--tourara-radius` | Default card radius |
+
+Mask light/dark follows `data-theme="dark"|"light"` on `<html>` (or `prefers-color-scheme`).
+
+For full control, use `customTooltipRenderer` / `renderMask` / `tooltipContainerStyle` / `contentContainerStyle`.
 
 ---
 
@@ -419,13 +431,14 @@ Override appearance with CSS variables (`--tourara-accent`, `--tourara-bg`, …)
 tourara/
 ├── src/                     # Publishable library
 │   ├── components/          # Tour, TourHost, Mask, Tooltip, Tip
+│   ├── context/             # TourProvider (React Context)
 │   ├── hooks/               # useTour, useUpdateTour, useDetectVisible
-│   ├── store/               # Zustand tour store
+│   ├── styles/              # Default chrome CSS + inject
 │   ├── types/               # TourStep, TourProps, …
 │   ├── utils/               # positioning, DOM, tourActions
-│   ├── assets/              # TourTooltipCorner SVG
 │   └── index.ts             # Public exports
-├── showcase/                # GitHub Pages demo app
+├── showcase/                # GitHub Pages demo (MUI only here)
+├── docs/                    # Architecture, API, contributing, publishing
 ├── .github/workflows/       # Pages deploy
 ├── vite.config.ts           # Library build (ES + CJS + d.ts)
 └── vite.showcase.config.ts  # Demo build (base: /tourara/)
@@ -442,6 +455,7 @@ pnpm build            # Library → dist/
 pnpm build:showcase   # Static demo → showcase-dist/
 pnpm preview          # Preview showcase-dist
 pnpm typecheck
+pnpm pack:check       # Dry-run npm tarball contents
 ```
 
 ---
@@ -455,14 +469,19 @@ Live demo: https://persianstudio.github.io/tourara/
 
 ---
 
-## Publishing (later)
+## Publishing to npm
 
-The package is npm-ready (`exports`, `files: ["dist"]`, `publishConfig.access: public`). When ready:
+Full checklist: **[docs/PUBLISHING.md](./docs/PUBLISHING.md)**.
+
+Short path (requires npm auth + `@persianstudio` publish rights):
 
 ```bash
-pnpm build
+pnpm typecheck && pnpm build && pnpm pack:check
+# bump version in package.json (semver), then:
 pnpm publish --access public
 ```
+
+`prepublishOnly` re-runs typecheck + build before upload. Package peers are **only** `react` / `react-dom`.
 
 ---
 
@@ -470,7 +489,7 @@ pnpm publish --access public
 
 - Prefer **slots** (`customTooltipRenderer`, `renderMask`, custom next/prev/close) over editing core files.
 - Keep positioning / DOM math in `src/utils`; keep UI in `src/components`.
-- New themes can ship as separate entry points later without changing the engine.
+- Theme via CSS variables first; ship alternate skins later without changing the engine.
 
 ---
 
@@ -483,6 +502,7 @@ Contributor-oriented docs live under [`docs/`](./docs/):
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Folder layout & runtime mental model |
 | [docs/API.md](./docs/API.md) | Export map & option groups |
 | [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Setup, principles, PR checklist |
+| [docs/PUBLISHING.md](./docs/PUBLISHING.md) | npm release checklist & troubleshooting |
 
 ---
 

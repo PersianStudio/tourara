@@ -8,11 +8,15 @@ const CAPABILITIES = [
     body: '13 orientations including diagonals; prefers candidates that stay in view.',
   },
   {
+    title: 'Precise caret',
+    body: 'Tooltip pointer aims at the focus border (target + maskPadding). Set corner: "none" to hide.',
+  },
+  {
     title: 'Tip markers',
     body: 'Inactive steps show tips on nearby targets (capped, collision-aware, rAF-throttled). Use disableTips to skip.',
   },
   {
-    title: 'Store or controlled',
+    title: 'Context or controlled',
     body: 'TourProvider + TourHost + useTour for apps, or controlled <Tour /> with local open state.',
   },
   {
