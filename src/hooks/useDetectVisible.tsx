@@ -1,3 +1,7 @@
+/**
+ * Hook that watches selectors and reports when matched elements enter or leave view.
+ */
+
 import { useEffect, useRef } from 'react';
 import { isElementInView as utilIsElementInView } from '../utils/viewport';
 

@@ -1,3 +1,7 @@
+/**
+ * LTR/RTL helpers for mirroring and resolving tooltip orientation preferences.
+ */
+
 import { CardinalOrientation } from './positioning';
 
 export type TourDirection = 'ltr' | 'rtl';

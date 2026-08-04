@@ -1,3 +1,6 @@
+/**
+ * Keyboard / focus constants (tab keycode and focusable selector).
+ */
 export const TAB_KEYCODE = 9;
 
 //  selector adapted from https://gist.github.com/r3lk3r/0030bab99347a2326334e00b23188cab#file-focusloopingutil-js

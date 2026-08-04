@@ -474,6 +474,18 @@ pnpm publish --access public
 
 ---
 
+## Project docs
+
+Contributor-oriented docs live under [`docs/`](./docs/):
+
+| Doc | Purpose |
+|-----|---------|
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Folder layout & runtime mental model |
+| [docs/API.md](./docs/API.md) | Export map & option groups |
+| [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Setup, principles, PR checklist |
+
+---
+
 ## Credits
 
 Extracted and open-sourced from the ICE web app tour system by [Persian Studio](https://github.com/PersianStudio).

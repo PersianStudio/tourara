@@ -1,3 +1,6 @@
+/**
+ * DOM geometry helpers (coords/dims, focusables, portal root) used by tour layout.
+ */
 //@ts-nocheck
 
 import { focusableSelector } from './constants';

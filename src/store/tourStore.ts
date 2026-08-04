@@ -1,3 +1,7 @@
+/**
+ * Zustand store holding the active tour props and open state.
+ */
+
 import { create } from 'zustand';
 import { tourDefaultProps } from '../constants';
 import type { TourProps } from '../types';

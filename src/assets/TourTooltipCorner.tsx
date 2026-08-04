@@ -1,3 +1,6 @@
+/**
+ * Decorative SVG corner piece for the active tooltip when `corner` is enabled.
+ */
 import type { SVGAttributes } from 'react';
 
 export const TourTooltipCorner = (props: SVGAttributes<SVGElement>) => (

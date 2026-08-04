@@ -1,3 +1,6 @@
+/**
+ * Scroll-offset helpers that convert between document and viewport coordinates.
+ */
 //@ts-nocheck
 
 import { Coords, Dims, getCombinedData, getElementCoords, getElementDims, isDefaultScrollingElement } from './dom';

@@ -1,16 +1,18 @@
+/**
+ * Inactive-step tip marker: positions a clickable icon beside off-step targets
+ * so users can jump to that step when the element is in view.
+ */
 import { Box, useTheme } from '@mui/material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { TipIcon } from '../icons';
-import type { TourStep } from '../types';
-import { defaultTipOrientations, resolveOrientationPreferences, type TourDirection } from '../utils/direction';
-import { CardinalOrientation } from '../utils/positioning';
-import { isElementInView as utilIsElementInView } from '../utils/viewport';
+import { TipIcon } from '../../icons';
+import type { TourStep } from '../../types';
+import { defaultTipOrientations, resolveOrientationPreferences, type TourDirection } from '../../utils/direction';
+import { isElementInView as utilIsElementInView } from '../../utils/viewport';
+import { TIP_SIZE } from './constants';
+import { placeTipMarker } from './placeTipMarker';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isElementInView = utilIsElementInView as any;
-
-const TIP_SIZE = 26;
-const TIP_GAP = 8;
 
 interface InactiveTooltipProps {
   step: TourStep;
@@ -20,81 +22,6 @@ interface InactiveTooltipProps {
   activeIndex: number;
   goToStep: (stepIndex: number) => void;
   direction?: TourDirection;
-}
-
-function placeTipMarker(
-  target: HTMLElement,
-  preferences: CardinalOrientation[],
-): { x: number; y: number; orientation: CardinalOrientation } | null {
-  const rect = target.getBoundingClientRect();
-  if (rect.width <= 0 || rect.height <= 0) return null;
-
-  const candidates: Array<{ orientation: CardinalOrientation; x: number; y: number }> = preferences.map(
-    (orientation) => {
-      switch (orientation) {
-        case CardinalOrientation.EAST:
-          return {
-            orientation,
-            x: rect.right + TIP_GAP,
-            y: rect.top + rect.height / 2 - TIP_SIZE / 2,
-          };
-        case CardinalOrientation.WEST:
-          return {
-            orientation,
-            x: rect.left - TIP_GAP - TIP_SIZE,
-            y: rect.top + rect.height / 2 - TIP_SIZE / 2,
-          };
-        case CardinalOrientation.SOUTH:
-          return {
-            orientation,
-            x: rect.left + rect.width / 2 - TIP_SIZE / 2,
-            y: rect.bottom + TIP_GAP,
-          };
-        case CardinalOrientation.NORTH:
-          return {
-            orientation,
-            x: rect.left + rect.width / 2 - TIP_SIZE / 2,
-            y: rect.top - TIP_GAP - TIP_SIZE,
-          };
-        case CardinalOrientation.SOUTHEAST:
-        case CardinalOrientation.EASTSOUTH:
-          return { orientation, x: rect.right + TIP_GAP, y: rect.bottom - TIP_SIZE };
-        case CardinalOrientation.NORTHEAST:
-        case CardinalOrientation.EASTNORTH:
-          return { orientation, x: rect.right + TIP_GAP, y: rect.top };
-        case CardinalOrientation.SOUTHWEST:
-        case CardinalOrientation.WESTSOUTH:
-          return { orientation, x: rect.left - TIP_GAP - TIP_SIZE, y: rect.bottom - TIP_SIZE };
-        case CardinalOrientation.NORTHWEST:
-        case CardinalOrientation.WESTNORTH:
-          return { orientation, x: rect.left - TIP_GAP - TIP_SIZE, y: rect.top };
-        case CardinalOrientation.CENTER:
-        default:
-          return {
-            orientation: CardinalOrientation.EAST,
-            x: rect.right + TIP_GAP,
-            y: rect.top + rect.height / 2 - TIP_SIZE / 2,
-          };
-      }
-    },
-  );
-
-  const fits = (x: number, y: number) =>
-    x >= 4 && y >= 4 && x + TIP_SIZE <= window.innerWidth - 4 && y + TIP_SIZE <= window.innerHeight - 4;
-
-  for (const c of candidates) {
-    if (fits(c.x, c.y)) return c;
-  }
-
-  const fallbackSide = preferences[0] === CardinalOrientation.WEST ? 'west' : 'east';
-  return {
-    orientation: fallbackSide === 'west' ? CardinalOrientation.WEST : CardinalOrientation.EAST,
-    x:
-      fallbackSide === 'west'
-        ? Math.max(4, rect.left - TIP_GAP - TIP_SIZE)
-        : Math.min(Math.max(4, rect.right + TIP_GAP), window.innerWidth - TIP_SIZE - 4),
-    y: Math.min(Math.max(4, rect.top + rect.height / 2 - TIP_SIZE / 2), window.innerHeight - TIP_SIZE - 4),
-  };
 }
 
 export const Tip: React.FC<InactiveTooltipProps> = ({

@@ -1,4 +1,6 @@
-// cornerStyles.ts
+/**
+ * Tip-marker corner styles: which border radius / transform to use per orientation.
+ */
 //@ts-nocheck
 
 import { CardinalOrientation } from './positioning';

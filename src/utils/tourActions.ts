@@ -1,3 +1,7 @@
+/**
+ * DOM helpers for conditional tour actions (wait, click fallback, retry).
+ */
+
 export const isElementPresent = (selector: string): boolean => {
   return Boolean(document.querySelector(selector));
 };

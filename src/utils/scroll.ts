@@ -1,3 +1,6 @@
+/**
+ * Smooth / instant scroll helpers that bring tour targets into the viewport.
+ */
 //@ts-nocheck
 
 import { Coords } from './dom';

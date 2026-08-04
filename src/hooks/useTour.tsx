@@ -1,3 +1,7 @@
+/**
+ * Hook that registers tour options into the shared store on mount.
+ */
+
 import { useEffect } from 'react';
 import { useTourStore } from '../store/tourStore';
 import type { TourProps } from '../types';

@@ -1,3 +1,6 @@
+/**
+ * Viewport geometry helpers: size, scroll dims, and in-view checks for tour roots.
+ */
 //@ts-nocheck
 
 import { Coords, Dims, getElementCoords, getElementDims, isDefaultScrollingElement, isWithinAt } from './dom';

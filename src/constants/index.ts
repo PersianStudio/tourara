@@ -1,3 +1,6 @@
+/**
+ * Default `<Tour />` option values applied when callers omit fields.
+ */
 import { TourProps } from '../types';
 
 export const tourDefaultProps: Partial<TourProps> = {

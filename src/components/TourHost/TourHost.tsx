@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useTourStore } from '../store/tourStore';
-import { Tour } from './Tour';
+import { useTourStore } from '../../store/tourStore';
+import { Tour } from '../Tour';
 
 export interface TourHostProps {
   /**

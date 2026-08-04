@@ -1,3 +1,7 @@
+/**
+ * Showcase shell: wires TourHost, hero CTAs, and demo sections.
+ * Individual demos live under `./demo/` so this file stays orchestration-only.
+ */
 import { useState } from 'react';
 import { TourHost, useTour, useTourStore, type TourDirection, type TourStep } from '@persianstudio/tourara';
 import { CapabilityGrid } from './demo/CapabilityGrid';
@@ -9,8 +13,11 @@ import { SetupGuide } from './demo/SetupGuide';
 import { WhyBuilt } from './demo/WhyBuilt';
 import { RTL_TOUR_STEPS } from './demo/rtlTourSteps';
 import { CUSTOM_UI_TOUR_STEPS, MAIN_TOUR_STEPS, SETUP_TOUR_STEPS } from './demo/tourSteps';
+import { Hero } from './sections/Hero';
+import { ScrollDeepSection } from './sections/ScrollDeepSection';
 import { useColorMode } from './theme';
 
+/** Shared defaults for store-driven tours started from the showcase. */
 const TOUR_BASE = {
   maskPadding: 6,
   maskRadius: 2,
@@ -19,6 +26,7 @@ const TOUR_BASE = {
   direction: 'ltr' as TourDirection,
 };
 
+/** Opens the main product tour once when the showcase mounts. */
 function TourBootstrap() {
   useTour({
     tourOptions: {
@@ -73,44 +81,7 @@ export function App() {
       <TourHost />
       <TourBootstrap />
 
-      <header className="hero">
-        <div className="hero-visual">
-          <div className="float-mark" aria-hidden data-tour="hero-mark" />
-          <div className="hero-ring" aria-hidden />
-        </div>
-        <p className="hero-kicker">Persian Studio · docs + playground</p>
-        <h1 className="brand">tourara</h1>
-        <p className="hero-lead">
-          Product tours for React — SVG masks, tip markers, auto-scroll, interactive steps, RTL/LTR, and render slots.
-          Defaults stay English and LTR.
-        </p>
-        <div className="hero-actions">
-          <button type="button" className="btn btn-primary" data-tour="start-tour" onClick={startMainTour}>
-            {tourRunning ? 'Tour running…' : 'Start full tour'}
-          </button>
-          <button type="button" className="btn btn-ghost" onClick={toggleMode} aria-label="Toggle color mode">
-            {mode === 'dark' ? 'Light mode' : 'Dark mode'}
-          </button>
-          <a className="btn btn-ghost" href="#why">
-            Why we built it
-          </a>
-          <a className="btn btn-ghost" href="#rtl">
-            RTL / LTR
-          </a>
-          <a className="btn btn-ghost" href="#setup">
-            Setup guide
-          </a>
-          <a className="btn btn-ghost" href="https://github.com/PersianStudio/tourara">
-            GitHub
-          </a>
-        </div>
-        <ul className="hero-meta">
-          <li>ltr default</li>
-          <li>rtl ready</li>
-          <li>auto-scroll</li>
-          <li>slots</li>
-        </ul>
-      </header>
+      <Hero tourRunning={tourRunning} onStartMainTour={startMainTour} mode={mode} onToggleMode={toggleMode} />
 
       <WhyBuilt />
 
@@ -135,23 +106,7 @@ export function App() {
 
       <ControlledDemo />
 
-      <section className="section scroll-section">
-        <div className="section-head">
-          <h2>Scroll & deep content</h2>
-          <p>
-            When a step activates, tourara auto-scrolls the target into view (<code>block: &apos;center&apos;</code>).
-            Disable with <code>disableAutoScroll</code>.
-          </p>
-        </div>
-        <article className="panel panel-wide" data-tour="scroll-card">
-          <p className="eyebrow">Below the fold</p>
-          <h3>Auto-scroll to target</h3>
-          <p>
-            Body scroll stays unlocked so <code>scrollIntoView</code> works while the mask handles interaction. The
-            viewport follows each step.
-          </p>
-        </article>
-      </section>
+      <ScrollDeepSection />
 
       <footer className="footer">
         <span>Persian Studio · MIT</span>

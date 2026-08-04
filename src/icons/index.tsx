@@ -1,3 +1,6 @@
+/**
+ * Inline SVG icons used by tour chrome (close, chevrons, media, tip marker).
+ */
 import type { SVGAttributes } from 'react';
 
 const base = {

@@ -1,4 +1,8 @@
 /**
+ * Scroll locking for active tours: blocks user scroll while allowing programmatic scroll.
+ */
+
+/**
  * Blocks user-driven scrolling while allowing programmatic scrollIntoView / scrollTo.
  * Uses event prevention instead of overflow:hidden (which breaks scrollIntoView).
  */

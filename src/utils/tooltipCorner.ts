@@ -1,4 +1,6 @@
-// cornerStyles.ts
+/**
+ * Tooltip corner / SVG styles based on orientation and nearest target corner.
+ */
 // @ts-nocheck
 
 import { SxProps, Theme } from '@mui/material';
