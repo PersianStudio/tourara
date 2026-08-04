@@ -52,6 +52,7 @@ const forbiddenPatterns = [
   /^showcase-dist(\/|$)/,
   /^src(\/|$)/,
   /^docs(\/|$)/,
+  /^docs-dist(\/|$)/,
   /\.map$/,
   /^scripts(\/|$)/,
 ];

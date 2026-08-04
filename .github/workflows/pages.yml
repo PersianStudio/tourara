@@ -39,6 +39,14 @@ jobs:
       - name: Build showcase
         run: pnpm build:showcase
 
+      - name: Build docs
+        run: pnpm docs:build
+
+      - name: Merge docs into Pages artifact
+        run: |
+          mkdir -p showcase-dist/docs
+          cp -R docs-dist/. showcase-dist/docs/
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

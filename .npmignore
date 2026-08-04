@@ -7,8 +7,9 @@
 # Never ship demo / docs / sources
 showcase
 showcase-dist
-src
 docs
+docs-dist
+src
 scripts
 .github
 *.config.ts

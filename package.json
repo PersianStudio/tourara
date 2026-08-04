@@ -71,10 +71,14 @@
   },
   "scripts": {
     "dev": "vite --config vite.showcase.config.ts",
-    "clean": "rm -rf dist showcase-dist",
+    "docs:dev": "vitepress dev docs --port 5174",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs --port 4174",
+    "clean": "rm -rf dist showcase-dist docs-dist",
     "typecheck": "tsc -p tsconfig.lib.json --noEmit",
     "build": "pnpm clean && vite build && cp src/styles/tourara.css dist/tourara.css",
     "build:showcase": "vite build --config vite.showcase.config.ts",
+    "build:pages": "pnpm build:showcase && pnpm docs:build && mkdir -p showcase-dist/docs && cp -R docs-dist/. showcase-dist/docs/",
     "preview": "vite preview --config vite.showcase.config.ts",
     "prepack": "pnpm typecheck && pnpm build",
     "pack:check": "node scripts/assert-npm-pack.mjs",
@@ -95,7 +99,8 @@
     "react-dom": "^18.3.1",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
-    "vite-plugin-dts": "^4.5.3"
+    "vite-plugin-dts": "^4.5.3",
+    "vitepress": "^1.6.4"
   },
   "packageManager": "pnpm@9.15.0"
 }

@@ -16,6 +16,7 @@
 |---|---|
 | **Package** | [`@persianstudio/tourara`](https://www.npmjs.com/package/@persianstudio/tourara) |
 | **Live demo** | [persianstudio.github.io/tourara](https://persianstudio.github.io/tourara/) |
+| **Docs** | [persianstudio.github.io/tourara/docs](https://persianstudio.github.io/tourara/docs/) |
 | **Repo** | [github.com/PersianStudio/tourara](https://github.com/PersianStudio/tourara) |
 | **License** | MIT |
 
@@ -454,8 +455,8 @@ tourara/
 │   ├── utils/               # positioning, DOM, tourActions
 │   └── index.ts             # Public exports
 ├── showcase/                # GitHub Pages demo (MUI only here)
-├── docs/                    # Architecture, API, contributing, publishing
-├── .github/workflows/       # Pages deploy
+├── docs/                    # VitePress docs site (guide + API + internals)
+├── .github/workflows/       # Pages deploy (showcase + docs)
 ├── vite.config.ts           # Library build (ES + CJS + d.ts)
 └── vite.showcase.config.ts  # Demo build (base: /tourara/)
 ```
@@ -467,8 +468,11 @@ tourara/
 ```bash
 pnpm install
 pnpm dev              # Showcase → http://localhost:5173/tourara/
+pnpm docs:dev         # Docs → http://localhost:5174/tourara/docs/
 pnpm build            # Library → dist/
 pnpm build:showcase   # Static demo → showcase-dist/
+pnpm docs:build       # VitePress → docs-dist/
+pnpm build:pages      # Showcase + docs merged for Pages
 pnpm preview          # Preview showcase-dist
 pnpm typecheck
 pnpm pack:check       # Dry-run npm tarball contents
@@ -478,10 +482,16 @@ pnpm pack:check       # Dry-run npm tarball contents
 
 ## GitHub Pages
 
-Every push to `main` runs [`.github/workflows/pages.yml`](.github/workflows/pages.yml): install → build library → build showcase → deploy.
+Every push to `main` runs [`.github/workflows/pages.yml`](.github/workflows/pages.yml): install → build library → build showcase → build docs → merge docs into the Pages artifact → deploy.
 
-Enable once: repo **Settings → Pages → Source → GitHub Actions**.  
-Live demo: https://persianstudio.github.io/tourara/
+| URL | Content |
+|-----|---------|
+| https://persianstudio.github.io/tourara/ | Interactive showcase |
+| https://persianstudio.github.io/tourara/docs/ | Full documentation (VitePress) |
+
+Enable once: repo **Settings → Pages → Source → GitHub Actions**.
+
+Details: **[docs/internals/github-pages.md](./docs/internals/github-pages.md)**.
 
 ---
 
@@ -511,15 +521,15 @@ pnpm publish --access public
 
 ## Project docs
 
-Contributor-oriented docs live under [`docs/`](./docs/):
+Full documentation is authored under [`docs/`](./docs/) and published to **[persianstudio.github.io/tourara/docs](https://persianstudio.github.io/tourara/docs/)**.
 
-| Doc | Purpose |
-|-----|---------|
-| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Folder layout & runtime mental model |
-| [docs/API.md](./docs/API.md) | Export map & option groups |
-| [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Setup, principles, PR checklist |
-| [docs/PUBLISHING.md](./docs/PUBLISHING.md) | npm release checklist & troubleshooting |
-| [docs/SEO.md](./docs/SEO.md) | Search / npm / GitHub discoverability |
+| Section | Purpose |
+|---------|---------|
+| [Guide](https://persianstudio.github.io/tourara/docs/guide/getting-started) | Setup, placement, mask, tooltip, tips, RTL, slots, responsive |
+| [API](https://persianstudio.github.io/tourara/docs/api/overview) | Exports, components, options, helpers |
+| [Internals](https://persianstudio.github.io/tourara/docs/internals/architecture) | Architecture, contributing, npm publish, GitHub Pages, SEO |
+
+Local: `pnpm docs:dev`
 
 ---
 

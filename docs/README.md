@@ -1,16 +1,33 @@
 # Docs
 
-Internal documentation for **tourara** contributors and maintainers.
+User and maintainer documentation for **tourara**.
 
-| Doc | Audience |
-|-----|----------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | How the library is layered |
-| [API.md](./API.md) | Export map & option groups |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Local setup, PR habits, principles |
-| [PUBLISHING.md](./PUBLISHING.md) | npm release checklist |
-| [SEO.md](./SEO.md) | Search engines, npm keywords, GitHub topics |
+## Hosted site
 
-End-user guides stay at the repo root:
+After GitHub Pages deploy:
 
-- [README.md](../README.md) — English (install, API, theming, short publish blurb)
-- [README.fa.md](../README.fa.md) — فارسی
+**https://persianstudio.github.io/tourara/docs/**
+
+Local:
+
+```bash
+pnpm docs:dev
+pnpm docs:build
+```
+
+## Source map
+
+| Path | Content |
+|------|---------|
+| `docs/guide/` | End-user guides (setup, placement, RTL, slots, …) |
+| `docs/api/` | Export map, options, helpers |
+| `docs/internals/` | Architecture, contributing, npm publish, Pages, SEO |
+| `docs/.vitepress/` | Site config |
+
+Legacy flat files in this folder (`API.md`, …) redirect maintainers to the VitePress pages above.
+
+## Related
+
+- Live demo: https://persianstudio.github.io/tourara/  
+- npm: https://www.npmjs.com/package/@persianstudio/tourara  
+- Root [README.md](../README.md)  

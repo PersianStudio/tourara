@@ -6,6 +6,26 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://persianstudio.github.io/tourara/docs/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://persianstudio.github.io/tourara/docs/guide/getting-started</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://persianstudio.github.io/tourara/docs/api/overview</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://persianstudio.github.io/tourara/docs/internals/architecture</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://persianstudio.github.io/tourara/#why</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -13,7 +33,7 @@
   <url>
     <loc>https://persianstudio.github.io/tourara/#setup</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://persianstudio.github.io/tourara/#rtl</loc>

@@ -2,6 +2,7 @@
 node_modules
 dist
 showcase-dist
+docs-dist
 .DS_Store
 *.local
 .vite

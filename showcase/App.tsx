@@ -112,6 +112,7 @@ export function App() {
 
       <footer className="footer" role="contentinfo">
         <span>Persian Studio · MIT · @persianstudio/tourara</span>
+        <a href="/tourara/docs/">Docs</a>
         <a href="#why">Why tourara</a>
         <a href="#rtl">RTL product tours</a>
         <a href="#setup">Setup guide</a>
