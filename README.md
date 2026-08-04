@@ -32,7 +32,7 @@ After searching the ecosystem, we could not find a tour component that satisfied
 - **Spotlight mask** — full-viewport SVG overlay with a rounded cutout around the target
 - **Smart placement** — 13 cardinal / diagonal orientations; prefers in-view candidates
 - **RTL & LTR** — `direction: 'ltr' | 'rtl'` (default **`ltr`**); east/west preferences mirror in RTL; chrome uses `dir`
-- **Tip markers** — small indicators on other visible steps while the active tooltip is open
+- **Tip markers** — small indicators on other visible steps (capped, rAF-throttled; opt out with `disableTips`)
 - **Store or controlled** — mount `<TourHost />` + `useTour`, or drive `<Tour />` yourself
 - **Interactive steps** — `customNextFunc`, `nextOnTargetClick`, DOM helpers for open-dropdown / wait-for-element flows
 - **Keyboard** — `Escape` closes; `←` / `→` navigate (swapped in RTL reading order)
@@ -295,6 +295,7 @@ Options can be set on the **tour** (`Tour` / store props) and **overridden per s
 | `maskPadding` | `5` | Gap around the cutout. |
 | `maskRadius` | `2` | Cutout corner radius. |
 | `disableMask` | `false` | Hide the overlay. |
+| `disableTips` | `false` | Skip inactive tip markers (cheapest tip mode). |
 | `disableMaskInteraction` | `false` | When `true`, mask captures pointer events more aggressively. |
 | `disableCloseOnClick` | `false` | Don’t close when clicking the dimmed area. |
 | `tooltipMaxWidth` | responsive | Number, string, or MUI breakpoint map. |

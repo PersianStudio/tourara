@@ -1,64 +1,64 @@
 /**
- * requestAnimationFrame burst that keeps calling updateTour until the target
- * geometry is stable for N frames or the duration budget expires. Used when a
- * step opens so late-layouting targets settle quickly.
+ * Short rAF settle after a step opens. Geometry-only — never rebinds listeners.
  */
 
 import type { Coords, Dims } from '../../utils/dom';
 
-export interface StartUltraFastUpdatesArgs {
-  updateTour: () => void;
+export interface StartSettleLoopArgs {
+  updateGeometry: () => void;
   targetPosition: { current: Coords | null };
   targetSize: { current: Dims | null };
   duration?: number;
   stabilityThreshold?: number;
 }
 
-export function startUltraFastUpdates({
-  updateTour,
+export function startSettleLoop({
+  updateGeometry,
   targetPosition,
   targetSize,
-  duration = 2000,
-  stabilityThreshold = 5,
-}: StartUltraFastUpdatesArgs): () => void {
+  duration = 480,
+  stabilityThreshold = 3,
+}: StartSettleLoopArgs): () => void {
   const startTime = Date.now();
   let animationFrameId = 0;
   let stabilityCounter = 0;
   let lastPosition: Coords | null = null;
   let lastSize: Dims | null = null;
 
-  const isElementStable = (currentPosition: Coords | null, currentSize: Dims | null) => {
-    if (!lastPosition || !lastSize) return false;
+  const isStable = (pos: Coords | null, size: Dims | null) => {
+    if (!lastPosition || !lastSize || !pos || !size) return false;
     return (
-      currentPosition?.x === lastPosition?.x &&
-      currentPosition?.y === lastPosition?.y &&
-      currentSize?.width === lastSize?.width &&
-      currentSize?.height === lastSize?.height
+      pos.x === lastPosition.x &&
+      pos.y === lastPosition.y &&
+      size.width === lastSize.width &&
+      size.height === lastSize.height
     );
   };
 
-  const ultraFastUpdate = () => {
-    const elapsedTime = Date.now() - startTime;
-    const currentTargetPosition = targetPosition.current;
-    const currentTargetSize = targetSize.current;
+  const tick = () => {
+    updateGeometry();
 
-    if (isElementStable(currentTargetPosition, currentTargetSize)) {
-      stabilityCounter++;
+    const pos = targetPosition.current;
+    const size = targetSize.current;
+
+    if (isStable(pos, size)) {
+      stabilityCounter += 1;
     } else {
       stabilityCounter = 0;
     }
 
-    lastPosition = currentTargetPosition ? { ...currentTargetPosition } : null;
-    lastSize = currentTargetSize ? { ...currentTargetSize } : null;
+    lastPosition = pos ? { ...pos } : null;
+    lastSize = size ? { ...size } : null;
 
-    if (elapsedTime < duration && stabilityCounter < stabilityThreshold) {
-      updateTour();
-      animationFrameId = requestAnimationFrame(ultraFastUpdate);
-    } else {
-      cancelAnimationFrame(animationFrameId);
+    const elapsed = Date.now() - startTime;
+    if (elapsed < duration && stabilityCounter < stabilityThreshold) {
+      animationFrameId = requestAnimationFrame(tick);
     }
   };
 
-  ultraFastUpdate();
+  animationFrameId = requestAnimationFrame(tick);
   return () => cancelAnimationFrame(animationFrameId);
 }
+
+/** @deprecated Alias — prefer startSettleLoop. */
+export const startUltraFastUpdates = startSettleLoop;

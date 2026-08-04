@@ -124,7 +124,8 @@ export const MAIN_TOUR_STEPS: TourStep[] = [
     title: 'Moving targets',
     content: 'With movingTarget + updateInterval, the mask and tooltip track elements that animate or resize.',
     movingTarget: true,
-    updateInterval: 120,
+    // Floor is 200ms in the engine; keep demos polite to the main thread.
+    updateInterval: 400,
     maskPadding: 14,
     maskRadius: 40,
     orientationPreferences: [CardinalOrientation.WEST, CardinalOrientation.EAST, CardinalOrientation.SOUTH],

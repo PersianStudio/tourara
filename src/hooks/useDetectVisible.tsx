@@ -1,53 +1,93 @@
 /**
- * Hook that watches selectors and reports when matched elements enter or leave view.
+ * Reports when step targets enter / leave the viewport using IntersectionObserver.
+ *
+ * Replaces the old document-wide MutationObserver (attributes + subtree) which
+ * fired constantly and caused React setState storms during tours.
  */
 
 import { useEffect, useRef } from 'react';
-import { isElementInView as utilIsElementInView } from '../utils/viewport';
-
-const isElementInView = utilIsElementInView as any;
 
 interface UseDetectVisibilityOptions {
   selectors: string[];
   root: Element | undefined;
   onVisible: (selector: string) => void;
   onHidden: (selector: string) => void;
+  /** When false, observers are disconnected (e.g. tour closed). */
+  enabled?: boolean;
 }
 
-export const useDetectVisibility = ({ selectors, onVisible, onHidden, root }: UseDetectVisibilityOptions) => {
-  const visibleElements = useRef<Set<string>>(new Set());
+function resolveElement(selector: string, root?: Element): Element | null {
+  if (root) {
+    const scoped = root.querySelector(selector);
+    if (scoped) return scoped;
+  }
+  return document.querySelector(selector);
+}
+
+export const useDetectVisibility = ({
+  selectors,
+  onVisible,
+  onHidden,
+  root,
+  enabled = true,
+}: UseDetectVisibilityOptions) => {
+  const onVisibleRef = useRef(onVisible);
+  const onHiddenRef = useRef(onHidden);
+  onVisibleRef.current = onVisible;
+  onHiddenRef.current = onHidden;
+
+  const selectorsKey = selectors.join('\0');
 
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const elements = selectors?.length ? Array.from(document?.querySelectorAll(selectors?.join(','))) : [];
+    if (!enabled || !selectors.length) return;
 
-      elements.forEach((element) => {
-        const selector = selectors.find((sel) => element.matches(sel));
-        if (!selector) return;
+    const state = new Map<string, boolean>();
+    const observers: IntersectionObserver[] = [];
 
-        const isInViewport = isElementInView(root, element as HTMLElement);
-        const isVisible = isElementVisible(element);
+    const observe = (selector: string, el: Element) => {
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          const now = Boolean(entry?.isIntersecting);
+          const prev = state.get(selector);
+          if (prev === now) return;
+          state.set(selector, now);
+          if (now) onVisibleRef.current(selector);
+          else onHiddenRef.current(selector);
+        },
+        { root: null, threshold: 0.01, rootMargin: '0px' },
+      );
+      io.observe(el);
+      observers.push(io);
+    };
 
-        if (isInViewport && isVisible && !visibleElements.current.has(selector)) {
-          // visibleElements.current.add(selector);
-          onVisible(selector);
-        } else {
-          onHidden(selector);
+    for (const selector of selectors) {
+      const el = resolveElement(selector, root);
+      if (el) observe(selector, el);
+    }
+
+    // Lightweight attach for late-mounted targets — debounced, not per-mutation work.
+    let debounceId = 0;
+    const mo = new MutationObserver(() => {
+      window.clearTimeout(debounceId);
+      debounceId = window.setTimeout(() => {
+        for (const selector of selectors) {
+          if (state.has(selector)) continue;
+          const el = resolveElement(selector, root);
+          if (el) {
+            state.set(selector, false);
+            observe(selector, el);
+          }
         }
-      });
+      }, 250);
     });
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-    });
+    mo.observe(document.body, { childList: true, subtree: true });
 
-    return () => observer.disconnect();
-  }, [selectors]);
-
-  const isElementVisible = (element: Element): boolean => {
-    const rect = element.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0 && window.getComputedStyle(element).visibility !== 'hidden';
-  };
+    return () => {
+      window.clearTimeout(debounceId);
+      mo.disconnect();
+      observers.forEach((o) => o.disconnect());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectorsKey, root, enabled]);
 };

@@ -27,6 +27,7 @@ export interface TourPortalProps {
   maskRadius?: number;
   disableMask?: boolean;
   renderMask?: TourOptions['renderMask'];
+  disableTips?: boolean;
   tourLogic: TourLogic;
   steps: (TourStep & { isVisible?: boolean })[];
   currentStepIndex: number;
@@ -57,6 +58,7 @@ export function TourPortal({
   maskRadius,
   disableMask,
   renderMask,
+  disableTips,
   tourLogic,
   steps,
   currentStepIndex,
@@ -127,7 +129,7 @@ export function TourPortal({
         </Box>
       )}
 
-      {tourRoot && (
+      {tourRoot && !disableTips && (
         <TipLayer
           steps={steps}
           currentStepIndex={currentStepIndex}

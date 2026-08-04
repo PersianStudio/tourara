@@ -1,44 +1,38 @@
 /**
- * Presentational tip marker — position is decided by TipLayer.
+ * Presentational tip marker — memoized so TipLayer can recompute placement
+ * without rewriting every marker DOM node when only one tip moved.
  */
 import { Box, useTheme } from '@mui/material';
+import { memo } from 'react';
 import { TipIcon } from '../../icons';
 import { TIP_SIZE } from './constants';
 
 export type TipMarkerProps = {
   x: number;
   y: number;
-  /** Optional: jump to this step when the marker is interactive. */
-  onActivate?: () => void;
+  stepIndex: number;
+  /** Stable handler — receives step index (avoids per-tip closures breaking memo). */
+  onActivate: (stepIndex: number) => void;
 };
 
-export function TipMarker({ x, y, onActivate }: TipMarkerProps) {
+function TipMarkerInner({ x, y, stepIndex, onActivate }: TipMarkerProps) {
   const theme = useTheme();
-  const interactive = Boolean(onActivate);
 
   return (
     <Box
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      onClick={
-        interactive
-          ? (e) => {
-              e.stopPropagation();
-              onActivate?.();
-            }
-          : undefined
-      }
-      onKeyDown={
-        interactive
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                e.stopPropagation();
-                onActivate?.();
-              }
-            }
-          : undefined
-      }
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        e.stopPropagation();
+        onActivate(stepIndex);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          onActivate(stepIndex);
+        }
+      }}
       sx={{
         position: 'fixed',
         top: y,
@@ -47,8 +41,8 @@ export function TipMarker({ x, y, onActivate }: TipMarkerProps) {
         height: TIP_SIZE,
         zIndex: 10001,
         borderRadius: '50%',
-        pointerEvents: interactive ? 'auto' : 'none',
-        cursor: interactive ? 'pointer' : 'default',
+        pointerEvents: 'auto',
+        cursor: 'pointer',
         bgcolor: 'grey.900',
         border: '2px solid',
         borderColor: 'grey.900',
@@ -72,3 +66,5 @@ export function TipMarker({ x, y, onActivate }: TipMarkerProps) {
     </Box>
   );
 }
+
+export const TipMarker = memo(TipMarkerInner);

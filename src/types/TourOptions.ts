@@ -60,6 +60,11 @@ export interface TourOptions {
   allowForeignTarget?: boolean;
   nextOnTargetClick?: boolean;
   validateNextOnTargetClick?: () => Promise<boolean>;
+  /**
+   * Skip inactive tip markers entirely. Cheapest mode when you only need the
+   * active spotlight + tooltip.
+   */
+  disableTips?: boolean;
 }
 
 export interface TourStep extends TourOptions {

@@ -1,13 +1,17 @@
 /**
- * React wiring for tour re-layout: holds geometry refs, resets scroll keys on
- * step change, focuses the tooltip with preventScroll, and kicks off the
- * ultra-fast rAF settle burst while the tour is open.
+ * React wiring for tour re-layout.
+ *
+ * Performance contract:
+ * - Listeners / focus trap install **once per step**
+ * - Settle + resize paths only run geometry updates (no teardown thrash)
+ * - React state updates are skipped when coords are unchanged
  */
 
 import React from 'react';
 import type { Coords, Dims } from '../../utils/dom';
-import { runTourUpdate } from './runTourUpdate';
-import { startUltraFastUpdates } from './startUltraFastUpdates';
+import { applyTourGeometry } from './applyTourGeometry';
+import { bindTourListeners } from './bindTourListeners';
+import { startSettleLoop } from './startUltraFastUpdates';
 import type { UseUpdateTourArgs } from './types';
 
 export const useUpdateTour = ({
@@ -26,26 +30,64 @@ export const useUpdateTour = ({
   const targetPosition = React.useRef<Coords | null>(null);
   const targetSize = React.useRef<Dims | null>(null);
   const lastScrollKey = React.useRef('');
+  const tooltipCoordsRef = React.useRef<Coords | undefined>(undefined);
 
-  const {
-    selector,
-    tooltipSeparation,
-  } = options;
+  const { selector, tooltipSeparation } = options;
 
-  const updateTour = () => {
-    runTourUpdate({
+  const writeTooltipPosition: UseUpdateTourArgs['setTooltipPosition'] = (value) => {
+    setTooltipPosition((prev) => {
+      const next = typeof value === 'function' ? value(prev) : value;
+      tooltipCoordsRef.current = next?.coords;
+      return next;
+    });
+  };
+
+  const updateGeometry = (allowScroll: boolean) => {
+    applyTourGeometry({
       options,
       tooltip,
-      cleanup,
+      tourRoot,
+      setTooltipPosition: writeTooltipPosition,
+      currentStepIndex,
+      setTarget,
+      targetPosition,
+      targetSize,
+      lastScrollKey,
+      allowScroll,
+    });
+  };
+
+  /** Full step open: cleanup → geometry (+ scroll) → bind listeners once → short settle. */
+  const openStep = () => {
+    cleanup();
+    lastScrollKey.current = '';
+    const currentTarget = applyTourGeometry({
+      options,
+      tooltip,
+      tourRoot,
+      setTooltipPosition: writeTooltipPosition,
+      currentStepIndex,
+      setTarget,
+      targetPosition,
+      targetSize,
+      lastScrollKey,
+      allowScroll: true,
+    });
+
+    bindTourListeners({
+      options,
+      tooltip,
       tourLogic,
       tourRoot,
-      setTooltipPosition,
+      setTooltipPosition: writeTooltipPosition,
       currentStepIndex,
       setTarget,
       cleanupRefs,
       targetPosition,
       targetSize,
       lastScrollKey,
+      currentTarget,
+      tooltipCoordsRef,
     });
   };
 
@@ -54,7 +96,7 @@ export const useUpdateTour = ({
   }, [currentStepIndex, selector]);
 
   React.useEffect(() => {
-    let stopUltraFastUpdates: (() => void) | undefined;
+    let stopSettle: (() => void) | undefined;
     let raf = 0;
 
     if (!tourOpen || !tourRoot) {
@@ -63,24 +105,24 @@ export const useUpdateTour = ({
     }
 
     raf = requestAnimationFrame(() => {
-      if (tooltip.current) {
-        tooltip.current.focus({ preventScroll: true });
-        stopUltraFastUpdates = startUltraFastUpdates({
-          updateTour,
-          targetPosition,
-          targetSize,
-          duration: 1800,
-          stabilityThreshold: 5,
-        });
-      }
+      if (!tooltip.current) return;
+      tooltip.current.focus({ preventScroll: true });
+      openStep();
+      stopSettle = startSettleLoop({
+        updateGeometry: () => updateGeometry(false),
+        targetPosition,
+        targetSize,
+        duration: 480,
+        stabilityThreshold: 3,
+      });
     });
 
     return () => {
       cancelAnimationFrame(raf);
-      if (stopUltraFastUpdates) stopUltraFastUpdates();
+      if (stopSettle) stopSettle();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStepIndex, currentStepContent, tourOpen, tourRoot, tooltipSeparation]);
 
-  return { updateTour };
+  return { updateTour: openStep };
 };

@@ -1,6 +1,15 @@
+/**
+ * Guided tour orchestrator: owns step state, wires hooks, and delegates
+ * mask/tooltip/tip rendering to {@link TourPortal}.
+ *
+ * Performance notes:
+ * - Tip on-screen checks live in TipLayer (no MutationObserver on the page)
+ * - Geometry settle does not rebind listeners every frame
+ * - Scroll lock only while the tour is open
+ */
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { useDetectVisibility, useUpdateTour } from '../../hooks';
+import { useUpdateTour } from '../../hooks';
 import { useTourStore } from '../../store/tourStore';
 import type { TourProps, TourStep } from '../../types';
 import type { OrientationCoords } from '../../utils/positioning';
@@ -12,16 +21,10 @@ import { useTourKeyboard } from './useTourKeyboard';
 import { useTourRoot } from './useTourRoot';
 import { useTourStepNavigation } from './useTourStepNavigation';
 
-/**
- * Guided tour orchestrator: owns step state, wires hooks, and delegates
- * mask/tooltip/tip rendering to {@link TourPortal}.
- */
 export const Tour = (props: TourProps) => {
   const { initialStepIndex, isOpen, resetKey, onClose } = props;
 
-  const [steps, setSteps] = useState<(TourStep & { isVisible?: boolean })[]>(
-    props.steps.map((step) => ({ ...step, isVisible: false })) || [],
-  );
+  const [steps, setSteps] = useState<TourStep[]>(props.steps || []);
   const [target, setTarget] = React.useState<HTMLElement | undefined>(undefined);
   const [tooltipPosition, setTooltipPosition] = React.useState<OrientationCoords | undefined>(undefined);
   const [currentStepIndex, setCurrentStepIndex] = React.useState<number>(initialStepIndex || 0);
@@ -57,6 +60,7 @@ export const Tour = (props: TourProps) => {
     identifier,
     disableMask,
     renderMask,
+    disableTips,
     direction = 'ltr',
   } = options;
 
@@ -66,6 +70,7 @@ export const Tour = (props: TourProps) => {
 
   React.useEffect(() => {
     return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cleanup = () => {
@@ -106,7 +111,7 @@ export const Tour = (props: TourProps) => {
     return lockUserScroll();
   }, [tourOpen]);
 
-  const { updateTour } = useUpdateTour({
+  useUpdateTour({
     options,
     tourOpen,
     tooltip,
@@ -119,35 +124,6 @@ export const Tour = (props: TourProps) => {
     setTarget,
     cleanupRefs,
     target,
-  });
-
-  void updateTour;
-
-  useDetectVisibility({
-    selectors: steps.map((step) => step.selector),
-    onVisible: (selector) => {
-      if (!isOpen) return;
-      setSteps((perv) => [
-        ...perv.map((step) => {
-          if (step.selector === selector) {
-            return { ...step, isVisible: true };
-          }
-          return step;
-        }),
-      ]);
-    },
-    onHidden: (selector) => {
-      if (!isOpen) return;
-      setSteps((perv) => [
-        ...perv.map((step) => {
-          if (step.selector === selector) {
-            return { ...step, isVisible: false };
-          }
-          return step;
-        }),
-      ]);
-    },
-    root: tourRoot,
   });
 
   useEffect(() => {
@@ -186,6 +162,7 @@ export const Tour = (props: TourProps) => {
       maskRadius={maskRadius}
       disableMask={disableMask}
       renderMask={renderMask}
+      disableTips={disableTips}
       tourLogic={tourLogic}
       steps={steps}
       currentStepIndex={currentStepIndex}

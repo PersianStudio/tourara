@@ -9,7 +9,7 @@ const CAPABILITIES = [
   },
   {
     title: 'Tip markers',
-    body: 'Inactive steps can show circular tips on other visible targets.',
+    body: 'Inactive steps show tips on nearby targets (capped, collision-aware, rAF-throttled). Use disableTips to skip.',
   },
   {
     title: 'Store or controlled',
@@ -25,7 +25,7 @@ const CAPABILITIES = [
   },
   {
     title: 'Moving targets',
-    body: 'Poll + re-place when elements animate, resize, or shift in layout.',
+    body: 'Optional polling (min 200ms) re-places when elements animate — geometry-only updates, not full remounts.',
   },
   {
     title: 'Keyboard',

@@ -65,10 +65,11 @@ import type {
 |-------|----------|
 | Direction | `direction: 'ltr' \| 'rtl'` |
 | Mask | `maskPadding`, `maskRadius`, `disableMask`, `renderMask` |
-| Placement | `orientationPreferences`, `tipOrientationPreferences`, `tooltipSeparation` |
+| Tips | `disableTips`, `tipOrientationPreferences` |
+| Placement | `orientationPreferences`, `tooltipSeparation` |
 | Chrome | `noFooter`, `noStepper`, `finishBtnText`, `skipBtnText`, `corner` |
 | Slots | `customTooltipRenderer`, `customFooterRenderer`, `customNextFunc` |
-| Behavior | `nextOnTargetClick`, `movingTarget`, `disableAutoScroll`, `allowForeignTarget` |
+| Behavior | `nextOnTargetClick`, `movingTarget`, `updateInterval` (≥200ms), `disableAutoScroll`, `allowForeignTarget` |
 
 ## DOM helpers
 

@@ -1,12 +1,8 @@
 /**
- * Collision-aware tip placement.
+ * Collision-aware tip placement (budget-conscious candidate search).
  *
- * Candidates must:
- * 1. Fit in the viewport
- * 2. Not overlap the active spotlight / tooltip / other tips / sibling targets
- *
- * Prefer caller-supplied orientations, then fall back through a full side set.
- * Returns `null` when every candidate collides — hiding the tip beats a bad overlap.
+ * Tries preferred sides first at the default gap, then a short fallback set.
+ * Edge-slides and a second gap only run if the cheap pass fails.
  */
 import { CardinalOrientation } from '../../utils/positioning';
 import { TIP_CLEARANCE, TIP_GAP, TIP_SIZE, VIEWPORT_INSET } from './constants';
@@ -26,30 +22,29 @@ export type PlaceTipMarkerResult = {
 
 export type PlaceTipMarkerOptions = {
   preferences: CardinalOrientation[];
-  /** Hard obstacles (spotlight, tooltip, already-placed tips). */
   obstacles?: TipRect[];
-  /** Extra gap between tip and obstacles (defaults to TIP_CLEARANCE). */
   clearance?: number;
+  /** Skip an extra getBoundingClientRect when the caller already measured. */
+  targetRect?: Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom' | 'width' | 'height'>;
 };
 
-/** All sides we may try after preferred orientations fail. */
-const FALLBACK_ORIENTATIONS: CardinalOrientation[] = [
+const CHEAP_FALLBACKS: CardinalOrientation[] = [
   CardinalOrientation.EAST,
   CardinalOrientation.WEST,
   CardinalOrientation.SOUTH,
   CardinalOrientation.NORTH,
+];
+
+const FULL_FALLBACKS: CardinalOrientation[] = [
+  ...CHEAP_FALLBACKS,
   CardinalOrientation.SOUTHEAST,
   CardinalOrientation.NORTHEAST,
   CardinalOrientation.SOUTHWEST,
   CardinalOrientation.NORTHWEST,
-  CardinalOrientation.EASTSOUTH,
-  CardinalOrientation.EASTNORTH,
-  CardinalOrientation.WESTSOUTH,
-  CardinalOrientation.WESTNORTH,
 ];
 
 function candidateFor(
-  rect: DOMRect,
+  rect: Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom' | 'width' | 'height'>,
   orientation: CardinalOrientation,
   gap: number,
 ): { orientation: CardinalOrientation; x: number; y: number } {
@@ -83,22 +78,20 @@ function candidateFor(
   }
 }
 
-/** Extra candidates offset along an edge when mid-side is blocked. */
 function edgeSlideCandidates(
-  rect: DOMRect,
+  rect: Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom' | 'width' | 'height'>,
   gap: number,
 ): Array<{ orientation: CardinalOrientation; x: number; y: number }> {
-  const slides = [0.25, 0.75];
-  const out: Array<{ orientation: CardinalOrientation; x: number; y: number }> = [];
-  for (const t of slides) {
-    const y = rect.top + rect.height * t - TIP_SIZE / 2;
-    const x = rect.left + rect.width * t - TIP_SIZE / 2;
-    out.push({ orientation: CardinalOrientation.EAST, x: rect.right + gap, y });
-    out.push({ orientation: CardinalOrientation.WEST, x: rect.left - gap - TIP_SIZE, y });
-    out.push({ orientation: CardinalOrientation.SOUTH, x, y: rect.bottom + gap });
-    out.push({ orientation: CardinalOrientation.NORTH, x, y: rect.top - gap - TIP_SIZE });
-  }
-  return out;
+  // One slide per side (was eight) — enough to escape mid-edge blocks.
+  const t = 0.2;
+  const y = rect.top + rect.height * t - TIP_SIZE / 2;
+  const x = rect.left + rect.width * t - TIP_SIZE / 2;
+  return [
+    { orientation: CardinalOrientation.EAST, x: rect.right + gap, y },
+    { orientation: CardinalOrientation.WEST, x: rect.left - gap - TIP_SIZE, y },
+    { orientation: CardinalOrientation.SOUTH, x, y: rect.bottom + gap },
+    { orientation: CardinalOrientation.NORTH, x, y: rect.top - gap - TIP_SIZE },
+  ];
 }
 
 function fitsViewport(x: number, y: number): boolean {
@@ -112,50 +105,80 @@ function fitsViewport(x: number, y: number): boolean {
 
 function isClear(x: number, y: number, obstacles: TipRect[], clearance: number): boolean {
   if (!fitsViewport(x, y)) return false;
+  if (obstacles.length === 0) return true;
   const box = tipMarkerRect(x, y, TIP_SIZE);
-  return !obstacles.some((o) => rectsOverlap(box, o, clearance));
+  for (let i = 0; i < obstacles.length; i++) {
+    if (rectsOverlap(box, obstacles[i], clearance)) return false;
+  }
+  return true;
 }
 
-/**
- * Place a tip beside `target`, avoiding `obstacles`.
- * Returns `null` when no clear viewport position exists.
- */
+function tryOrientations(
+  rect: Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom' | 'width' | 'height'>,
+  orientations: CardinalOrientation[],
+  gap: number,
+  obstacles: TipRect[],
+  clearance: number,
+): PlaceTipMarkerResult | null {
+  for (const o of orientations) {
+    const c = candidateFor(rect, o, gap);
+    if (isClear(c.x, c.y, obstacles, clearance)) return c;
+  }
+  return null;
+}
+
 export function placeTipMarker(
   target: HTMLElement,
   options: PlaceTipMarkerOptions | CardinalOrientation[],
 ): PlaceTipMarkerResult | null {
-  // Back-compat: older callers passed preferences as the 2nd argument array.
   const opts: PlaceTipMarkerOptions = Array.isArray(options)
     ? { preferences: options }
     : options;
 
   const preferences = opts.preferences?.length
     ? opts.preferences
-    : [CardinalOrientation.EAST, CardinalOrientation.WEST, CardinalOrientation.SOUTH, CardinalOrientation.NORTH];
+    : CHEAP_FALLBACKS;
   const obstacles = opts.obstacles ?? [];
   const clearance = opts.clearance ?? TIP_CLEARANCE;
 
-  const rect = target.getBoundingClientRect();
+  const rect = opts.targetRect ?? target.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return null;
 
-  const ordered = dedupeOrientations([...preferences, ...FALLBACK_ORIENTATIONS]);
-  const gaps = [TIP_GAP, TIP_GAP + 6, TIP_GAP + 14];
+  const preferred = dedupeOrientations(preferences);
 
-  for (const gap of gaps) {
-    const candidates = [
-      ...ordered.map((o) => candidateFor(rect, o, gap)),
-      ...edgeSlideCandidates(rect, gap),
-    ];
+  // Pass 1: preferences + cardinals at default gap (most tips resolve here).
+  const cheap = tryOrientations(
+    rect,
+    dedupeOrientations([...preferred, ...CHEAP_FALLBACKS]),
+    TIP_GAP,
+    obstacles,
+    clearance,
+  );
+  if (cheap) return cheap;
 
-    for (const c of candidates) {
-      if (isClear(c.x, c.y, obstacles, clearance)) {
-        return c;
-      }
-    }
+  // Pass 2: corners + edge slides, still default gap.
+  const wider = tryOrientations(
+    rect,
+    dedupeOrientations([...preferred, ...FULL_FALLBACKS]),
+    TIP_GAP,
+    obstacles,
+    clearance,
+  );
+  if (wider) return wider;
+
+  for (const c of edgeSlideCandidates(rect, TIP_GAP)) {
+    if (isClear(c.x, c.y, obstacles, clearance)) return c;
   }
 
-  // Nothing clear — hide rather than draw over the tooltip / spotlight / siblings.
-  return null;
+  // Pass 3: one larger gap only if still blocked (crowded UI near tooltip).
+  const pushed = tryOrientations(
+    rect,
+    dedupeOrientations([...preferred, ...FULL_FALLBACKS]),
+    TIP_GAP + 12,
+    obstacles,
+    clearance,
+  );
+  return pushed;
 }
 
 function dedupeOrientations(list: CardinalOrientation[]): CardinalOrientation[] {
@@ -169,7 +192,6 @@ function dedupeOrientations(list: CardinalOrientation[]): CardinalOrientation[] 
   return out;
 }
 
-/** Build a spotlight obstacle from the active target + mask padding. */
 export function spotlightObstacle(activeTarget: HTMLElement | undefined, maskPadding: number): TipRect | null {
   if (!activeTarget) return null;
   const r = activeTarget.getBoundingClientRect();
@@ -177,7 +199,6 @@ export function spotlightObstacle(activeTarget: HTMLElement | undefined, maskPad
   return inflateRect(toTipRect(r), Math.max(0, maskPadding));
 }
 
-/** Build a tooltip obstacle from the tour tooltip container element. */
 export function tooltipObstacle(tooltipEl: HTMLElement | undefined | null, margin = 10): TipRect | null {
   if (!tooltipEl) return null;
   const r = tooltipEl.getBoundingClientRect();

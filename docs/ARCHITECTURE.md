@@ -70,6 +70,17 @@ Inactive tip markers are placed by `TipLayer` in one pass. Placement avoids:
 
 If no clear slot exists, that tip is **hidden** rather than drawn over the tour.
 
+**Perf:** no polling interval; scroll/resize coalesced to one rAF; at most 6 tips; `disableTips` skips the layer entirely.
+
+## Performance model
+
+| Path | Behavior |
+|------|----------|
+| Step open | Geometry + bind listeners **once**, then ≤~480ms geometry-only settle |
+| Resize | Debounced geometry update (listeners stay bound) |
+| Tips | Event-driven rAF recompute, capped |
+| Visibility | Tour no longer runs a document MutationObserver; tip on-screen is local to TipLayer |
+
 ## Coordinate space
 
 The tour portal is `position: fixed`. Mask, tooltip, and tip positions use **viewport coordinates** (`getBoundingClientRect`), not document-scroll offsets.

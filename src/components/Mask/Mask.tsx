@@ -43,10 +43,13 @@ export function Mask(props: MaskOptions) {
 
   useEffect(() => {
     const updateDimensions = () => {
-      setContainerDims(getViewportScrollDims(tourRoot));
+      const next = getViewportScrollDims(tourRoot);
+      setContainerDims((prev) =>
+        prev.width === next.width && prev.height === next.height ? prev : next,
+      );
     };
 
-    window.addEventListener('resize', updateDimensions);
+    window.addEventListener('resize', updateDimensions, { passive: true });
     updateDimensions();
 
     return () => {

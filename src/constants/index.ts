@@ -9,7 +9,7 @@ export const tourDefaultProps: Partial<TourProps> = {
   maskRadius: 2,
   tooltipSeparation: 8,
   tooltipBorderRadius: 1,
-  transition: 'top 220ms ease, left 220ms ease',
+  transition: 'top 160ms ease, left 160ms ease',
   disableMaskInteraction: false,
   disableCloseOnClick: false,
   allowForeignTarget: true,
