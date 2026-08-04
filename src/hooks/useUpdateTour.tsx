@@ -1,26 +1,27 @@
 import React from 'react';
-import { TourStep, TourLogic, TourOptions, TourProps } from '../types';
-import { Coords, Dims, getElementDims as utilGetElementDims } from '../utils/dom';
-// import { centerViewportAroundElements } from '../utils/offset';
+import type { TourLogic, TourOptions, TourProps, TourStep } from '../types';
+import { isForeignTarget, type Coords, type Dims, getElementDims as utilGetElementDims } from '../utils/dom';
 import {
-  OrientationCoords,
+  type OrientationCoords,
   getTargetPosition as utilGetTargetPosition,
   getTooltipPosition as utilGetTooltipPosition,
 } from '../utils/positioning';
-
 import {
   debounce,
   setFocusTrap,
   setNextOnTargetClick,
   setTargetWatcher,
   setTourUpdateListener,
-  shouldScroll,
   shouldUpdate as utilShouldUpdate,
 } from '../utils/tour';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTargetPosition = utilGetTargetPosition as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTooltipPosition = utilGetTooltipPosition as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getElementDims = utilGetElementDims as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const shouldUpdate = utilShouldUpdate as any;
 
 export const useUpdateTour = ({
@@ -35,7 +36,6 @@ export const useUpdateTour = ({
   currentStepContent,
   setTarget,
   cleanupRefs,
-  target,
 }: {
   options: TourOptions & TourProps & TourStep;
   tourOpen: boolean;
@@ -51,8 +51,9 @@ export const useUpdateTour = ({
   target: HTMLElement | undefined;
   waitForTargetsTimeOut?: number;
 }) => {
-  const targetPosition: any = React.useRef<Coords>(null);
-  const targetSize: any = React.useRef<Dims>(null);
+  const targetPosition = React.useRef<Coords | null>(null);
+  const targetSize = React.useRef<Dims | null>(null);
+  const lastScrollKey = React.useRef('');
 
   const {
     selector,
@@ -69,31 +70,33 @@ export const useUpdateTour = ({
     setUpdateListener,
     removeUpdateListener,
     disableListeners,
-    // disableSmoothScroll,
+    disableSmoothScroll,
     allowForeignTarget,
     nextOnTargetClick,
     validateNextOnTargetClick,
-    steps,
   } = options;
 
   const root: Element | undefined = tourRoot;
   const tooltipContainer: HTMLElement | undefined = tooltip.current;
 
-  // Helper: Check if all targets are visible
-  // const checkTargetsVisibility = () => {
-  //   return steps.every((step) => {
-  //     const targetScope = document;
-  //     return !!targetScope.querySelector(step.selector);
-  //   });
-  // };
-
-  // Helper: Handle missing target elements
   const handleAbsenceOfNeededElements = () => {
     setTarget(undefined);
     setTooltipPosition(undefined);
   };
 
-  // update tooltip and target position in state
+  const scrollTargetIntoView = (el: HTMLElement, scrollKey: string) => {
+    if (disableAutoScroll) return;
+    if (allowForeignTarget && root && selector && isForeignTarget(root, selector)) return;
+    if (lastScrollKey.current === scrollKey) return;
+    lastScrollKey.current = scrollKey;
+
+    el.scrollIntoView({
+      behavior: disableSmoothScroll ? 'auto' : 'smooth',
+      block: 'center',
+      inline: 'nearest',
+    });
+  };
+
   const updateTour = () => {
     cleanup();
     if (!root || !tooltipContainer) {
@@ -102,9 +105,14 @@ export const useUpdateTour = ({
     }
 
     const targetScope: Element | Document = allowForeignTarget ? document : root;
-    const getTarget = (): HTMLElement | undefined => (targetScope.querySelector(selector) as HTMLElement) || undefined;
+    const getTarget = (): HTMLElement | undefined =>
+      (targetScope.querySelector(selector) as HTMLElement) || undefined;
     const currentTarget: HTMLElement | undefined = getTarget();
-    currentTarget?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+    if (currentTarget) {
+      scrollTargetIntoView(currentTarget, `${currentStepIndex}:${selector}`);
+    }
+
     const currentTargetPosition: Coords | undefined = getTargetPosition(root, currentTarget || undefined);
     const currentTargetDims: Dims | undefined = getElementDims(currentTarget || undefined);
     const smartPadding: number = disableMask ? 0 : maskPadding || 0;
@@ -124,36 +132,11 @@ export const useUpdateTour = ({
 
     setTarget(currentTarget);
     setTooltipPosition(tooltipPosition);
-    targetPosition.current = currentTargetPosition;
-    targetSize.current = currentTargetDims;
+    targetPosition.current = currentTargetPosition ?? null;
+    targetSize.current = currentTargetDims ?? null;
 
-    //focus trap subroutine
     const cleanupFocusTrap = setFocusTrap(tooltipContainer, currentTarget, disableMaskInteraction);
     cleanupRefs.current.push(cleanupFocusTrap);
-
-    // if (
-    //   shouldScroll({
-    //     disableAutoScroll,
-    //     allowForeignTarget,
-    //     selector,
-    //     root,
-    //     target: currentTarget,
-    //     tooltip: tooltipContainer,
-    //     tooltipPosition: tooltipPosition.coords,
-    //   })
-    // ) {
-    //   scrollToDestination(
-    //     root,
-    //     centerViewportAroundElements(
-    //       root,
-    //       tooltipContainer,
-    //       currentTarget,
-    //       tooltipPosition.coords,
-    //       currentTargetPosition,
-    //     ),
-    //     disableSmoothScroll,
-    //   );
-    // }
 
     if (!disableListeners) {
       const conditionalUpdate = () => {
@@ -186,7 +169,6 @@ export const useUpdateTour = ({
       });
 
       cleanupRefs.current.push(cleanupUpdateListener);
-      // if the user requests a watcher and there's supposed to be a target
       if (movingTarget && (currentTarget || selector)) {
         const cleanupWatcher = setTargetWatcher(conditionalUpdate, updateInterval || 0);
         cleanupRefs.current.push(cleanupWatcher);
@@ -198,14 +180,12 @@ export const useUpdateTour = ({
     }
   };
 
-  // Ultra-Fast Updates with Stability Check
   const startUltraFastUpdates = (duration = 2000, stabilityThreshold = 5) => {
-    // const allTargetsVisible = checkTargetsVisibility();
     const startTime = Date.now();
-    let animationFrameId: any;
+    let animationFrameId = 0;
     let stabilityCounter = 0;
-    let lastPosition: any = null;
-    let lastSize: any = null;
+    let lastPosition: Coords | null = null;
+    let lastSize: Dims | null = null;
 
     const isElementStable = (currentPosition: Coords | null, currentSize: Dims | null) => {
       if (!lastPosition || !lastSize) return false;
@@ -228,8 +208,8 @@ export const useUpdateTour = ({
         stabilityCounter = 0;
       }
 
-      lastPosition = { ...currentTargetPosition };
-      lastSize = { ...currentTargetSize };
+      lastPosition = currentTargetPosition ? { ...currentTargetPosition } : null;
+      lastSize = currentTargetSize ? { ...currentTargetSize } : null;
 
       if (elapsedTime < duration && stabilityCounter < stabilityThreshold) {
         updateTour();
@@ -243,7 +223,10 @@ export const useUpdateTour = ({
     return () => cancelAnimationFrame(animationFrameId);
   };
 
-  // React Effect: Trigger updates when the tour changes
+  React.useEffect(() => {
+    lastScrollKey.current = '';
+  }, [currentStepIndex, selector]);
+
   React.useEffect(() => {
     let stopUltraFastUpdates: (() => void) | undefined;
     let raf = 0;
@@ -253,11 +236,10 @@ export const useUpdateTour = ({
       return;
     }
 
-    // Ref is assigned after commit — wait one frame so tooltip.current exists.
     raf = requestAnimationFrame(() => {
       if (tooltip.current) {
         tooltip.current.focus({ preventScroll: true });
-        stopUltraFastUpdates = startUltraFastUpdates(1500, 5);
+        stopUltraFastUpdates = startUltraFastUpdates(1800, 5);
       }
     });
 

@@ -29,16 +29,16 @@ export const MAIN_TOUR_STEPS: TourStep[] = [
     selector: '[data-tour="nav-brand"]',
     title: 'Selector targeting',
     content: 'Any CSS selector works. Prefer stable anchors like [data-tour="…"] so layout refactors do not break tours.',
-    maskPadding: 10,
-    maskRadius: 10,
+    maskPadding: 8,
+    maskRadius: 4,
     orientationPreferences: [CardinalOrientation.SOUTH, CardinalOrientation.EAST],
   },
   {
     selector: '[data-tour="nav-search"]',
     title: 'Spotlight mask',
     content: 'The SVG mask dims the page and cuts a padded, rounded hole around the target. Click the dimmed area to close (unless disableCloseOnClick).',
-    maskPadding: 12,
-    maskRadius: 14,
+    maskPadding: 8,
+    maskRadius: 4,
     orientationPreferences: [CardinalOrientation.SOUTH],
   },
   {
@@ -220,6 +220,92 @@ export const CONTROLLED_STEPS: TourStep[] = [
     selector: '[data-tour="controlled-b"]',
     title: 'Same engine',
     content: 'Ideal for modals, tests, or when you already own open state.',
+    finishBtnText: 'Done',
+  },
+];
+
+export const SETUP_TOUR_STEPS: TourStep[] = [
+  {
+    selector: '[data-tour="setup-heading"]',
+    title: 'Setup, guided by tourara',
+    content: 'This whole section is documented with the same engine you ship — meta onboarding.',
+    maskPadding: 6,
+    maskRadius: 2,
+  },
+  {
+    selector: '[data-tour="setup-checklist"]',
+    title: 'Four steps to ship',
+    content: 'Install → anchors → steps → TourHost. The checklist is the mental model.',
+  },
+  {
+    selector: '[data-tour="setup-install"]',
+    title: 'Copy the install',
+    content: 'Each card is a ready-to-copy editor. Hit Copy, paste into your repo.',
+    orientationPreferences: [CardinalOrientation.NORTH, CardinalOrientation.SOUTH],
+  },
+  {
+    selector: '[data-tour="setup-host"]',
+    title: 'TourHost pattern',
+    content: 'Mount once, register steps with useTour, open with setTourProps({ isOpen: true }).',
+  },
+  {
+    selector: '[data-tour="setup-interactive"]',
+    title: 'Interactive next',
+    content: 'conditionalTourAction opens menus / waits for DOM before advancing — copy this pattern for nested UI.',
+    finishBtnText: 'Back to docs',
+  },
+];
+
+export const CUSTOM_UI_TOUR_STEPS: TourStep[] = [
+  {
+    selector: '[data-tour="custom-ui-shell"]',
+    title: 'Custom product chrome',
+    content: 'A dark, high-contrast shell — tourara does not force beige soft UI.',
+    maskRadius: 2,
+  },
+  {
+    selector: '[data-tour="custom-ui-slot-tooltip"]',
+    title: 'Full tooltip slot',
+    content: 'customTooltipRenderer replaces the entire tooltip while keeping placement + mask.',
+    customTooltipRenderer: (logic) => (
+      <Box
+        sx={{
+          p: 1.5,
+          bgcolor: '#f5c542',
+          color: '#0b1220',
+          border: '2px solid #1d4ed8',
+          maxWidth: 320,
+        }}
+      >
+        <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: 1 }}>
+          custom skin
+        </Typography>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.75 }}>
+          Yellow signal tooltip
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 1.25, opacity: 0.9 }}>
+          Prove that slots can look nothing like the default MUI chrome.
+        </Typography>
+        <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Button size="small" onClick={() => logic?.prev()} sx={{ color: '#0b1220' }}>
+            Back
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => logic?.next()}
+            sx={{ bgcolor: '#1d4ed8', borderRadius: 0 }}
+          >
+            Next
+          </Button>
+        </Stack>
+      </Box>
+    ),
+  },
+  {
+    selector: '[data-tour="custom-ui-kpi-a"]',
+    title: 'Stay on brand',
+    content: 'Mask cutouts and tip markers still track precisely on high-contrast panels.',
     finishBtnText: 'Done',
   },
 ];

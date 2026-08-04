@@ -386,7 +386,8 @@ export function getTooltipPosition(args: GetTooltipPositionArgs): OrientationCoo
         getScrolledViewportPosition(tourRoot, centerViewportAroundElement(tourRoot, target)),
       )
     : getViewportCenter(tourRoot, tooltip);
-  const defaultPosition: Coords = addAppropriateOffset(tourRoot, center);
+  // Fixed portal → viewport space (no scroll offset)
+  const defaultPosition: Coords = center || { x: 16, y: 16 };
 
   if (!tooltip || !tourRoot) {
     return;
@@ -416,9 +417,11 @@ export function getTooltipPosition(args: GetTooltipPositionArgs): OrientationCoo
     return { orientation: CardinalOrientation.CENTER, coords: defaultPosition };
   }
 
+  // Portal overlay is `position: fixed` — use viewport coordinates (getBoundingClientRect space).
+  // Do NOT add scroll offsets; those desync the tooltip/mask from the target when the page scrolls.
   const adjustedPosition: OrientationCoords = {
     orientation: rawPosition.orientation,
-    coords: addAppropriateOffset(tourRoot, rawPosition.coords),
+    coords: rawPosition.coords,
   };
 
   if (foreignTarget) {
@@ -436,6 +439,7 @@ export function getTooltipPosition(args: GetTooltipPositionArgs): OrientationCoo
   return adjustedPosition;
 }
 
-export function getTargetPosition(root: Element, target: HTMLElement): Coords {
-  return addAppropriateOffset(root, getElementCoords(target));
+export function getTargetPosition(_root: Element, target: HTMLElement): Coords {
+  // Viewport coordinates for the fixed tour portal.
+  return getElementCoords(target);
 }

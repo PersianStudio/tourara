@@ -215,14 +215,13 @@ export const Tour = (props: TourProps) => {
   }, [tourOpen, tourRoot, rootSelector]);
 
   React.useEffect(() => {
-    if (tourOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
+    // Do not lock body scroll — programmatic scrollIntoView / scrollTo must work
+    // while the tour is open. The mask already captures pointer interaction.
+    if (!tourOpen) return;
+    const prev = document.body.style.overscrollBehavior;
+    document.body.style.overscrollBehavior = 'none';
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overscrollBehavior = prev;
     };
   }, [tourOpen]);
 
@@ -307,19 +306,17 @@ export const Tour = (props: TourProps) => {
 
   const tooltipContainerStyle: SxProps<Theme> = {
     position: 'absolute',
-    top: tooltipPosition?.coords.y ?? 24,
-    left: tooltipPosition?.coords.x ?? 24,
+    top: tooltipPosition?.coords.y ?? 16,
+    left: tooltipPosition?.coords.x ?? 16,
     transition: transition,
     zIndex: 10000,
     pointerEvents: 'auto',
     outline: 'none',
     ...(!customTooltipRenderer && {
-      maxWidth: tooltipMaxWidth || { xs: 300, sm: 430, md: 480, lg: 530, xl: 580 },
-      width: '100%',
-      ...(!(corner === 'none') && {
-        px: tourLogic.stepContent.corner === 'small' ? 7.5 : 0,
-        py: tourLogic.stepContent.corner === 'small' ? 3.75 : 0,
-      }),
+      maxWidth: tooltipMaxWidth || { xs: 'calc(100vw - 24px)', sm: 360, md: 400, lg: 440 },
+      width: 'max-content',
+      minWidth: { xs: 0, sm: 260 },
+      boxSizing: 'border-box',
     }),
     ...tooltipContainerSx,
   };

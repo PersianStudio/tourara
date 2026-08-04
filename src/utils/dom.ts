@@ -225,16 +225,14 @@ export function getEdgeFocusables(
   };
 }
 
-export function getTargetInfo(root: Element, target?: HTMLElement): ElementInfo | undefined {
-  if (!root || !target) {
+export function getTargetInfo(_root: Element, target?: HTMLElement): ElementInfo | undefined {
+  if (!target) {
     return;
   }
-  const dims: Dims = getElementDims(target);
-  const coords: Coords = getTargetPosition(root, target);
-
+  // Viewport coords — matches the fixed tour portal / SVG mask.
   return {
-    coords,
-    dims,
+    coords: getElementCoords(target),
+    dims: getElementDims(target),
   };
 }
 

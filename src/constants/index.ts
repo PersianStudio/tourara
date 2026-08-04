@@ -3,8 +3,9 @@ import { TourProps } from '../types';
 export const tourDefaultProps: Partial<TourProps> = {
   maskPadding: 5,
   maskRadius: 2,
-  tooltipSeparation: 0,
-  transition: 'top 300ms ease, left 300ms ease',
+  tooltipSeparation: 8,
+  tooltipBorderRadius: 1,
+  transition: 'top 220ms ease, left 220ms ease',
   disableMaskInteraction: false,
   disableCloseOnClick: false,
   allowForeignTarget: true,

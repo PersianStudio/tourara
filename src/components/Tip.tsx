@@ -1,22 +1,15 @@
 import { Box, useTheme } from '@mui/material';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TipIcon } from '../icons';
 import type { TourStep } from '../types';
-import {
-  CardinalOrientation,
-  type OrientationCoords,
-  getTargetPosition as utilGetTargetPosition,
-  getTooltipPosition as utilGetTooltipPosition,
-} from '../utils/positioning';
-import { getCornerStyles } from '../utils/tipCorner';
+import { CardinalOrientation } from '../utils/positioning';
 import { isElementInView as utilIsElementInView } from '../utils/viewport';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getTargetPosition = utilGetTargetPosition as any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getTooltipPosition = utilGetTooltipPosition as any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isElementInView = utilIsElementInView as any;
+
+const TIP_SIZE = 26;
+const TIP_GAP = 8;
 
 interface InactiveTooltipProps {
   step: TourStep;
@@ -27,6 +20,90 @@ interface InactiveTooltipProps {
   goToStep: (stepIndex: number) => void;
 }
 
+function placeTipMarker(
+  target: HTMLElement,
+  preferences?: CardinalOrientation[],
+): { x: number; y: number; orientation: CardinalOrientation } | null {
+  const rect = target.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return null;
+
+  const prefs =
+    preferences?.length && preferences.length > 0
+      ? preferences
+      : [
+          CardinalOrientation.EAST,
+          CardinalOrientation.SOUTH,
+          CardinalOrientation.WEST,
+          CardinalOrientation.NORTH,
+          CardinalOrientation.SOUTHEAST,
+          CardinalOrientation.NORTHEAST,
+          CardinalOrientation.SOUTHWEST,
+          CardinalOrientation.NORTHWEST,
+        ];
+
+  const candidates: Array<{ orientation: CardinalOrientation; x: number; y: number }> = prefs.map((orientation) => {
+    switch (orientation) {
+      case CardinalOrientation.EAST:
+        return {
+          orientation,
+          x: rect.right + TIP_GAP,
+          y: rect.top + rect.height / 2 - TIP_SIZE / 2,
+        };
+      case CardinalOrientation.WEST:
+        return {
+          orientation,
+          x: rect.left - TIP_GAP - TIP_SIZE,
+          y: rect.top + rect.height / 2 - TIP_SIZE / 2,
+        };
+      case CardinalOrientation.SOUTH:
+        return {
+          orientation,
+          x: rect.left + rect.width / 2 - TIP_SIZE / 2,
+          y: rect.bottom + TIP_GAP,
+        };
+      case CardinalOrientation.NORTH:
+        return {
+          orientation,
+          x: rect.left + rect.width / 2 - TIP_SIZE / 2,
+          y: rect.top - TIP_GAP - TIP_SIZE,
+        };
+      case CardinalOrientation.SOUTHEAST:
+      case CardinalOrientation.EASTSOUTH:
+        return { orientation, x: rect.right + TIP_GAP, y: rect.bottom - TIP_SIZE };
+      case CardinalOrientation.NORTHEAST:
+      case CardinalOrientation.EASTNORTH:
+        return { orientation, x: rect.right + TIP_GAP, y: rect.top };
+      case CardinalOrientation.SOUTHWEST:
+      case CardinalOrientation.WESTSOUTH:
+        return { orientation, x: rect.left - TIP_GAP - TIP_SIZE, y: rect.bottom - TIP_SIZE };
+      case CardinalOrientation.NORTHWEST:
+      case CardinalOrientation.WESTNORTH:
+        return { orientation, x: rect.left - TIP_GAP - TIP_SIZE, y: rect.top };
+      case CardinalOrientation.CENTER:
+      default:
+        return {
+          orientation: CardinalOrientation.EAST,
+          x: rect.right + TIP_GAP,
+          y: rect.top + rect.height / 2 - TIP_SIZE / 2,
+        };
+    }
+  });
+
+  const fits = (x: number, y: number) =>
+    x >= 4 && y >= 4 && x + TIP_SIZE <= window.innerWidth - 4 && y + TIP_SIZE <= window.innerHeight - 4;
+
+  for (const c of candidates) {
+    if (fits(c.x, c.y)) return c;
+  }
+
+  // Clamp fallback to the east edge of the target within the viewport.
+  return {
+    orientation: CardinalOrientation.EAST,
+    x: Math.min(Math.max(4, rect.right + TIP_GAP), window.innerWidth - TIP_SIZE - 4),
+    y: Math.min(Math.max(4, rect.top + rect.height / 2 - TIP_SIZE / 2), window.innerHeight - TIP_SIZE - 4),
+  };
+}
+
 export const Tip: React.FC<InactiveTooltipProps> = ({
   step,
   isVisible = true,
@@ -35,134 +112,71 @@ export const Tip: React.FC<InactiveTooltipProps> = ({
   activeIndex,
 }) => {
   const theme = useTheme();
-  const [orientationCoords, setOrientationCoords] = useState<OrientationCoords | null>(null);
-  const [cornerStyles, setCornerStyles] = useState<React.CSSProperties>({});
-  const tipRef = React.useRef<HTMLElement | undefined>(undefined);
-  const [isInViewport, setIsInViewport] = useState(true);
-  const targetElement = containerRoot?.querySelector(step.selector) as HTMLElement;
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [coords, setCoords] = useState<{ x: number; y: number } | null>(null);
+  const [inView, setInView] = useState(true);
 
-  useEffect(() => {
-    setCornerStyles(getCornerStyles(orientationCoords?.orientation));
-  }, [orientationCoords]);
+  const resolveTarget = useCallback((): HTMLElement | null => {
+    return (
+      (document.querySelector(step.selector) as HTMLElement | null) ||
+      (containerRoot?.querySelector(step.selector) as HTMLElement | null) ||
+      null
+    );
+  }, [step.selector, containerRoot]);
 
-  const updateDimensions = () => {
-    if (
-      !isInViewport ||
-      !containerRoot ||
-      !step.selector ||
-      index === activeIndex ||
-      !targetElement ||
-      orientationCoords?.orientation === CardinalOrientation.CENTER
-    ) {
-      setOrientationCoords(null);
+  const update = useCallback(() => {
+    if (index === activeIndex) {
+      setCoords(null);
+      return;
+    }
+    const target = resolveTarget();
+    if (!target) {
+      setCoords(null);
       return;
     }
 
-    if (!targetElement) {
-      setOrientationCoords(null);
+    const visible = containerRoot ? isElementInView(containerRoot, target) : true;
+    setInView(Boolean(visible));
+    if (!visible) {
+      setCoords(null);
       return;
     }
 
-    const targetPos = getTargetPosition(containerRoot, targetElement);
-    if (targetPos) {
-      const tipPosition: OrientationCoords = getTooltipPosition({
-        target: targetElement,
-        tooltip: tipRef.current,
-        padding: 0,
-        tooltipSeparation: 0,
-        orientationPreferences: step.tipOrientationPreferences,
-        root: containerRoot,
-        getPositionFromCandidates: undefined,
-        disableAutoScroll: false,
-        allowForeignTarget: false,
-        selector: step?.selector,
-        isPreferredCandidatesIncluded: true,
-      });
-
-      setOrientationCoords({
-        orientation: tipPosition?.orientation,
-        coords: {
-          x: tipPosition?.coords.x,
-          y: tipPosition?.coords.y,
-        },
-      });
-    }
-  };
-
-  const scheduleViewportCheck = useCallback(() => {
-    if (!targetElement || !isElementInView) return;
-
-    const startTime = Date.now();
-    const duration = 500;
-    const interval = 100;
-
-    const poll = () => {
-      if (Date.now() - startTime < duration) {
-        if (isElementInView(containerRoot, targetElement)) {
-          setIsInViewport(true);
-        } else {
-          setIsInViewport(false);
-        }
-
-        timeoutRef.current = setTimeout(poll, interval);
-      }
-    };
-
-    poll();
-  }, [targetElement, containerRoot]);
+    const placed = placeTipMarker(target, step.tipOrientationPreferences);
+    setCoords(placed ? { x: placed.x, y: placed.y } : null);
+  }, [index, activeIndex, resolveTarget, containerRoot, step.tipOrientationPreferences]);
 
   useEffect(() => {
-    window.addEventListener('resize', updateDimensions);
-    updateDimensions();
-
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    const id = window.setInterval(update, 250);
     return () => {
-      window.removeEventListener('resize', updateDimensions);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+      window.clearInterval(id);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [containerRoot]);
+  }, [update]);
 
-  useEffect(() => {
-    updateDimensions();
-    scheduleViewportCheck();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [containerRoot, step.selector, index, activeIndex, tipRef.current, targetElement]);
-
-  if (
-    !isInViewport ||
-    !orientationCoords?.coords ||
-    !isVisible ||
-    index === activeIndex ||
-    !targetElement ||
-    orientationCoords?.orientation === CardinalOrientation.CENTER
-  ) {
+  if (!inView || !coords || !isVisible || index === activeIndex) {
     return null;
   }
 
   return (
     <Box
-      ref={tipRef}
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
       sx={{
         position: 'absolute',
-        top: orientationCoords?.coords.y,
-        left: orientationCoords?.coords.x,
-        width: 38,
-        height: 38,
-        borderColor: 'grey.900',
+        top: coords.y,
+        left: coords.x,
+        width: TIP_SIZE,
+        height: TIP_SIZE,
         zIndex: 9999,
-        borderTopLeftRadius: '50%',
-        borderTopRightRadius: '50%',
-        borderBottomRightRadius: '50%',
-        borderBottomLeftRadius: '50%',
-        transformOrigin: 'center center',
-        transform: 'none',
-        ...cornerStyles,
-        borderWidth: '5px',
-        pointerEvents: 'all',
+        borderRadius: '50%',
+        pointerEvents: 'none',
         bgcolor: 'grey.900',
+        border: '2px solid',
+        borderColor: 'grey.900',
+        boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
+        transition: 'top 180ms ease, left 180ms ease',
       }}
     >
       <Box

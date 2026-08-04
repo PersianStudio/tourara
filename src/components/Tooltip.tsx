@@ -1,4 +1,14 @@
-import { Box, Button, Divider, IconButton, MobileStepper, Stack, Typography, type SxProps, type Theme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  MobileStepper,
+  Stack,
+  Typography,
+  type SxProps,
+  type Theme,
+} from '@mui/material';
 import * as React from 'react';
 import { TourTooltipCorner } from '../assets/TourTooltipCorner';
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, ImageIcon, PlayIcon, VolumeIcon } from '../icons';
@@ -50,43 +60,36 @@ export function Tooltip(props: TooltipProps) {
   }>();
 
   React.useEffect(() => {
-    const activeSteps = allSteps?.filter((step) => {
-      return !!window.document.querySelector(step.selector);
-    });
+    const activeSteps = allSteps?.filter((step) => !!window.document.querySelector(step.selector));
     setActivePresetSteps(activeSteps);
   }, [allSteps, stepIndex]);
 
   React.useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let debounceTimer: any;
+    let debounceTimer: ReturnType<typeof setTimeout>;
 
     const applyStyles = () => {
-      const target: HTMLElement | undefined = window.document.querySelector(allSteps?.[stepIndex]?.selector) as
-        | HTMLElement
-        | undefined;
-
+      const target = window.document.querySelector(allSteps?.[stepIndex]?.selector) as HTMLElement | undefined;
       const cornerStyle = getCornerStyles(tooltipPosition?.orientation, target, tooltipRef.current, corner);
       setCornerStyles(cornerStyle);
     };
 
-    debounceTimer = setTimeout(() => {
-      applyStyles();
-    }, 50);
-
+    debounceTimer = setTimeout(applyStyles, 50);
     return () => clearTimeout(debounceTimer);
   }, [tooltipPosition, stepIndex, allSteps, tooltipRef, corner]);
 
   const prevDisabled: boolean = stepIndex - 1 < 0;
   const nextDisabled: boolean = stepIndex + 1 >= allSteps.length;
+  const radius = tooltipBorderRadius ?? 1;
 
   return (
     <Box
       sx={{
-        borderRadius: (theme) => theme.spacing(tooltipBorderRadius || 4),
+        borderRadius: radius,
         position: 'relative',
         ...cornerStyles?.style,
         bgcolor: 'grey.900',
         color: 'common.white',
+        maxWidth: '100%',
       }}
     >
       {!(corner === 'none') &&
@@ -109,11 +112,16 @@ export function Tooltip(props: TooltipProps) {
         )}
       {title && (
         <>
-          <Box sx={{ px: 5, py: 4, width: '100%', zIndex: 10001, position: 'sticky' }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Stack direction="row" spacing={2} alignItems="center">
+          <Box sx={{ px: { xs: 1.5, sm: 2 }, py: 1.25, width: '100%', zIndex: 10001, position: 'sticky' }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
                 {typeof title === 'string' ? (
-                  <Typography variant="h6" color="inherit" noWrap>
+                  <Typography
+                    variant="subtitle1"
+                    color="inherit"
+                    noWrap
+                    sx={{ fontWeight: 700, fontSize: { xs: '0.95rem', sm: '1.05rem' } }}
+                  >
                     {title}
                   </Typography>
                 ) : typeof title === 'function' ? (
@@ -121,11 +129,11 @@ export function Tooltip(props: TooltipProps) {
                 ) : (
                   title
                 )}
-                {audio && <VolumeIcon style={{ fontSize: 20, opacity: 0.9 }} />}
+                {audio && <VolumeIcon style={{ fontSize: 18, opacity: 0.9, flexShrink: 0 }} />}
               </Stack>
 
               {!noCloseIcon && (
-                <IconButton onClick={() => close()} size="small" aria-label="Close tour" sx={{ color: 'inherit' }}>
+                <IconButton onClick={() => close()} size="small" aria-label="Close tour" sx={{ color: 'inherit', p: 0.5 }}>
                   <CloseIcon />
                 </IconButton>
               )}
@@ -135,10 +143,18 @@ export function Tooltip(props: TooltipProps) {
         </>
       )}
 
-      <Stack sx={{ px: 5, pt: 4, width: '100%' }}>
-        <Box sx={{ overflow: 'auto', maxHeight: '13vh', ...contentContainerSx }}>
+      <Stack sx={{ px: { xs: 1.5, sm: 2 }, pt: 1.25, width: '100%' }}>
+        <Box
+          sx={{
+            overflow: 'auto',
+            maxHeight: { xs: '28vh', sm: '22vh', md: '18vh' },
+            fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+            lineHeight: 1.5,
+            ...contentContainerSx,
+          }}
+        >
           {typeof content === 'string' ? (
-            <Typography variant="body1" color="inherit" sx={{ opacity: 0.92 }}>
+            <Typography variant="body2" color="inherit" sx={{ opacity: 0.92, lineHeight: 1.55 }}>
               {content}
             </Typography>
           ) : typeof content === 'function' ? (
@@ -149,16 +165,16 @@ export function Tooltip(props: TooltipProps) {
         </Box>
 
         {(image || video) && (
-          <Stack sx={{ pb: { xs: 3, md: 6 }, pt: { xs: 3, md: 6 } }} direction="row" spacing={2} alignItems="center">
+          <Stack sx={{ py: 1.25 }} direction="row" spacing={1} alignItems="center">
             {video && (
               <Button
                 size="small"
-                startIcon={<PlayIcon style={{ fontSize: 16 }} />}
+                startIcon={<PlayIcon style={{ fontSize: 14 }} />}
                 sx={{
-                  borderRadius: 5,
+                  borderRadius: 1,
                   bgcolor: 'grey.700',
                   color: 'common.white',
-                  maxHeight: 32,
+                  maxHeight: 30,
                   '&:hover': { bgcolor: 'grey.600' },
                 }}
               >
@@ -168,12 +184,12 @@ export function Tooltip(props: TooltipProps) {
             {image && (
               <Button
                 size="small"
-                startIcon={<ImageIcon style={{ fontSize: 16 }} />}
+                startIcon={<ImageIcon style={{ fontSize: 14 }} />}
                 sx={{
-                  borderRadius: 5,
+                  borderRadius: 1,
                   bgcolor: 'grey.700',
                   color: 'common.white',
-                  maxHeight: 32,
+                  maxHeight: 30,
                   '&:hover': { bgcolor: 'grey.600' },
                 }}
               >
@@ -185,20 +201,7 @@ export function Tooltip(props: TooltipProps) {
       </Stack>
 
       {!noStepper && (
-        <Box
-          sx={{
-            px: 4,
-            pb: {
-              xs: 3,
-              md: 5,
-            },
-            ...(!image &&
-              !video && {
-                pt: { xs: 3, md: 6 },
-              }),
-            width: '100%',
-          }}
-        >
+        <Box sx={{ px: { xs: 1.5, sm: 2 }, pb: 1, pt: 1.25, width: '100%' }}>
           <MobileStepper
             variant="dots"
             sx={{
@@ -206,13 +209,13 @@ export function Tooltip(props: TooltipProps) {
               p: 0,
               '& .MuiMobileStepper-dot': {
                 bgcolor: (theme) => theme.palette.grey[500],
-                width: '6px',
-                height: '6px',
+                width: 6,
+                height: 6,
               },
               '& .MuiMobileStepper-dotActive': {
-                bgcolor: (theme) => theme.palette.background.paper,
-                width: 40,
-                borderRadius: 4,
+                bgcolor: (theme) => theme.palette.warning.main,
+                width: 28,
+                borderRadius: 1,
               },
             }}
             steps={activePresetSteps?.length || 0}
@@ -224,24 +227,24 @@ export function Tooltip(props: TooltipProps) {
         </Box>
       )}
       {!noFooter && (
-        <Stack sx={{ px: 5, pb: 4, pt: { xs: 1, md: 2 }, width: '100%', zIndex: 10001, position: 'sticky' }}>
+        <Stack sx={{ px: { xs: 1.5, sm: 2 }, pb: 1.5, pt: 0.5, width: '100%', zIndex: 10001, position: 'sticky' }}>
           {customFooterRenderer ? (
             customFooterRenderer(props)
           ) : (
-            <Stack direction="row" justifyContent="space-between" spacing={4} alignItems="center">
+            <Stack direction="row" justifyContent="space-between" spacing={1.5} alignItems="center">
               {stepIndex === allSteps.length - 1 ? (
-                <Button variant="contained" size="small" onClick={() => close(true)}>
+                <Button variant="contained" size="small" onClick={() => close(true)} sx={{ borderRadius: 1 }}>
                   {finishBtnText || 'Done'}
                 </Button>
               ) : noSkipBtn ? (
                 <Box />
               ) : (
-                <Button variant="contained" size="small" onClick={() => close(true)}>
+                <Button variant="contained" size="small" onClick={() => close(true)} sx={{ borderRadius: 1 }}>
                   {skipBtnText || 'Skip'}
                 </Button>
               )}
 
-              <Stack direction="row" alignItems="center" spacing={2}>
+              <Stack direction="row" alignItems="center" spacing={1}>
                 <IconButton
                   disabled={prevDisabled}
                   onClick={() => prev()}
