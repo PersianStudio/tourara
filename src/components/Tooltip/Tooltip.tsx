@@ -87,8 +87,22 @@ export function Tooltip(props: TooltipProps) {
     tooltipPosition?.orientation &&
     tooltipPosition.orientation !== CardinalOrientation.CENTER;
 
+  // Flatten the pointed corner so a diagonal caret meets the card edge cleanly.
+  const cornerRadiusStyle: React.CSSProperties = {};
+  if (showPointer && pointer?.side.includes('-')) {
+    if (pointer.side === 'top-right') cornerRadiusStyle.borderTopRightRadius = 0;
+    else if (pointer.side === 'top-left') cornerRadiusStyle.borderTopLeftRadius = 0;
+    else if (pointer.side === 'bottom-right') cornerRadiusStyle.borderBottomRightRadius = 0;
+    else if (pointer.side === 'bottom-left') cornerRadiusStyle.borderBottomLeftRadius = 0;
+  }
+
   return (
-    <div ref={cardRef} className="tourara-tooltip" dir={direction} style={{ borderRadius: radius }}>
+    <div
+      ref={cardRef}
+      className="tourara-tooltip"
+      dir={direction}
+      style={{ borderRadius: radius, ...cornerRadiusStyle }}
+    >
       {showPointer && pointer ? <TooltipPointer placement={pointer} /> : null}
 
       <TooltipHeader

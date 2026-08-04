@@ -3,15 +3,25 @@
  *
  * Aims the caret tip at the nearest point on the padded focus rect
  * (target + maskPadding — the same hole the mask stroke follows).
+ * Uses edge carets for cardinal relationships and corner carets when
+ * the focus sits diagonally from the tooltip.
  */
 
 import { CardinalOrientation } from '../../utils/positioning';
 
-export type PointerSide = 'top' | 'right' | 'bottom' | 'left';
+export type PointerSide =
+  | 'top'
+  | 'right'
+  | 'bottom'
+  | 'left'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right';
 
 export type PointerPlacement = {
   side: PointerSide;
-  /** Distance along the side from its start edge to the caret’s near corner. */
+  /** Distance along the side from its start edge to the caret’s near corner. Unused for corners. */
   offset: number;
   size: number;
   aimX: number;
@@ -50,6 +60,10 @@ function closestPointOnRect(px: number, py: number, rect: Rect): { x: number; y:
   };
 }
 
+function isCornerSide(side: PointerSide): boolean {
+  return side.includes('-');
+}
+
 /**
  * Map placement orientation → which tooltip edge faces the target.
  * Used as a soft hint; geometry still drives aim offset along the edge.
@@ -57,26 +71,38 @@ function closestPointOnRect(px: number, py: number, rect: Rect): { x: number; y:
 function sideFromOrientation(orientation: CardinalOrientation | null | undefined): PointerSide | null {
   switch (orientation) {
     case CardinalOrientation.NORTH:
-    case CardinalOrientation.NORTHEAST:
-    case CardinalOrientation.NORTHWEST:
       return 'bottom';
+    case CardinalOrientation.NORTHEAST:
+      return 'bottom-left';
+    case CardinalOrientation.NORTHWEST:
+      return 'bottom-right';
     case CardinalOrientation.SOUTH:
-    case CardinalOrientation.SOUTHEAST:
-    case CardinalOrientation.SOUTHWEST:
       return 'top';
+    case CardinalOrientation.SOUTHEAST:
+      return 'top-left';
+    case CardinalOrientation.SOUTHWEST:
+      return 'top-right';
     case CardinalOrientation.EAST:
-    case CardinalOrientation.EASTNORTH:
-    case CardinalOrientation.EASTSOUTH:
       return 'left';
+    case CardinalOrientation.EASTNORTH:
+      return 'bottom-left';
+    case CardinalOrientation.EASTSOUTH:
+      return 'top-left';
     case CardinalOrientation.WEST:
-    case CardinalOrientation.WESTNORTH:
-    case CardinalOrientation.WESTSOUTH:
       return 'right';
+    case CardinalOrientation.WESTNORTH:
+      return 'bottom-right';
+    case CardinalOrientation.WESTSOUTH:
+      return 'top-right';
     default:
       return null;
   }
 }
 
+/**
+ * Pick an edge or corner from the vector between tooltip center and aim.
+ * Diagonal when both axes are meaningful; otherwise a flat edge.
+ */
 function sideFromGeometry(tooltip: Rect, aimX: number, aimY: number): PointerSide {
   const cx = (tooltip.left + tooltip.right) / 2;
   const cy = (tooltip.top + tooltip.bottom) / 2;
@@ -84,12 +110,21 @@ function sideFromGeometry(tooltip: Rect, aimX: number, aimY: number): PointerSid
   const dy = aimY - cy;
   const nx = Math.abs(dx) / Math.max(tooltip.width, 1);
   const ny = Math.abs(dy) / Math.max(tooltip.height, 1);
+
+  // Both axes matter → sit on the facing corner (e.g. focus NE → top-right).
+  const DIAGONAL = 0.18;
+  if (nx >= DIAGONAL && ny >= DIAGONAL) {
+    const vertical = dy < 0 ? 'top' : 'bottom';
+    const horizontal = dx > 0 ? 'right' : 'left';
+    return `${vertical}-${horizontal}` as PointerSide;
+  }
+
   if (nx > ny) return dx > 0 ? 'right' : 'left';
   return dy > 0 ? 'bottom' : 'top';
 }
 
 /**
- * Place a caret on the tooltip edge so its tip aims at the focus border.
+ * Place a caret on the tooltip edge/corner so its tip aims at the focus border.
  */
 export function placeTooltipPointer(args: PlaceTooltipPointerArgs): PointerPlacement | null {
   const {
@@ -124,15 +159,17 @@ export function placeTooltipPointer(args: PlaceTooltipPointerArgs): PointerPlace
   const baseWidth = arrowSize * 2;
   const edgeInset = Math.min(12, Math.max(6, arrowSize));
 
-  let offset: number;
-  if (side === 'top' || side === 'bottom') {
-    const raw = aim.x - tooltip.left - arrowSize;
-    const max = Math.max(edgeInset, tooltip.width - baseWidth - edgeInset);
-    offset = Math.min(Math.max(raw, edgeInset), max);
-  } else {
-    const raw = aim.y - tooltip.top - arrowSize;
-    const max = Math.max(edgeInset, tooltip.height - baseWidth - edgeInset);
-    offset = Math.min(Math.max(raw, edgeInset), max);
+  let offset = 0;
+  if (!isCornerSide(side)) {
+    if (side === 'top' || side === 'bottom') {
+      const raw = aim.x - tooltip.left - arrowSize;
+      const max = Math.max(edgeInset, tooltip.width - baseWidth - edgeInset);
+      offset = Math.min(Math.max(raw, edgeInset), max);
+    } else {
+      const raw = aim.y - tooltip.top - arrowSize;
+      const max = Math.max(edgeInset, tooltip.height - baseWidth - edgeInset);
+      offset = Math.min(Math.max(raw, edgeInset), max);
+    }
   }
 
   if (!Number.isFinite(offset)) return null;
