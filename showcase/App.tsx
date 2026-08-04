@@ -4,6 +4,7 @@ import { ControlledDemo } from './demo/ControlledDemo';
 import { CustomUIShowcase } from './demo/CustomUIShowcase';
 import { DemoApp } from './demo/DemoApp';
 import { SetupGuide } from './demo/SetupGuide';
+import { WhyBuilt } from './demo/WhyBuilt';
 import { CUSTOM_UI_TOUR_STEPS, MAIN_TOUR_STEPS, SETUP_TOUR_STEPS } from './demo/tourSteps';
 
 const TOUR_BASE = {
@@ -73,6 +74,9 @@ export function App() {
           <button type="button" className="btn btn-primary" data-tour="start-tour" onClick={startMainTour}>
             {tourRunning ? 'Tour running…' : 'Start full tour'}
           </button>
+          <a className="btn btn-ghost" href="#why">
+            Why we built it
+          </a>
           <a className="btn btn-ghost" href="#setup">
             Setup guide
           </a>
@@ -87,6 +91,8 @@ export function App() {
           <li>slots</li>
         </ul>
       </header>
+
+      <WhyBuilt />
 
       <DemoApp onStartTour={startMainTour} tourRunning={tourRunning} />
 
@@ -123,6 +129,7 @@ export function App() {
 
       <footer className="footer">
         <span>Persian Studio · MIT</span>
+        <a href="#why">Why</a>
         <a href="#setup">Setup</a>
         <a href="#custom-ui">Custom UI</a>
         <a href="https://github.com/PersianStudio/tourara">GitHub</a>

@@ -903,3 +903,113 @@ code {
 .footer a:hover {
   text-decoration: underline;
 }
+
+.why-section {
+  margin-top: 1.25rem;
+}
+
+.why-frame {
+  border: 1px solid rgba(245, 197, 66, 0.35);
+  background:
+    linear-gradient(135deg, rgba(245, 197, 66, 0.1), transparent 42%),
+    linear-gradient(225deg, rgba(59, 130, 246, 0.12), transparent 40%),
+    rgba(16, 24, 38, 0.95);
+  padding: 1.15rem 1rem 1.25rem;
+  animation: rise 560ms ease both;
+}
+
+@media (min-width: 720px) {
+  .why-frame {
+    padding: 1.5rem 1.35rem 1.55rem;
+  }
+}
+
+.why-label {
+  margin: 0 0 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+.why-frame h2 {
+  margin: 0 0 0.85rem;
+  font-size: clamp(1.45rem, 3.6vw, 2.05rem);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  max-width: 18ch;
+}
+
+.why-body {
+  display: grid;
+  gap: 0.7rem;
+  max-width: 46rem;
+  margin-bottom: 1.15rem;
+}
+
+.why-body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 2.2vw, 1.05rem);
+  line-height: 1.65;
+}
+
+.why-body strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.why-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.95rem;
+}
+
+@media (max-width: 760px) {
+  .why-points {
+    grid-template-columns: 1fr;
+  }
+
+  .why-frame h2 {
+    max-width: none;
+  }
+}
+
+.why-points li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  align-items: start;
+  padding: 0.65rem 0.7rem;
+  background: rgba(7, 11, 20, 0.55);
+  border: 1px solid var(--line);
+}
+
+.why-points li > span {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--blue);
+  line-height: 1.4;
+  padding-top: 0.15rem;
+}
+
+.why-points strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+}
+
+.why-points p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
