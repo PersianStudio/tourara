@@ -43,7 +43,7 @@
 ## نصب
 
 ```bash
-pnpm add @persianstudio/tourara @mui/material @emotion/react @emotion/styled
+pnpm add @persianstudio/tourara
 ```
 
 ---
@@ -51,7 +51,7 @@ pnpm add @persianstudio/tourara @mui/material @emotion/react @emotion/styled
 ## شروع سریع (LTR — پیش‌فرض)
 
 ```tsx
-import { TourHost, useTour, useTourStore, type TourStep } from '@persianstudio/tourara';
+import { TourProvider, TourHost, useTour, useTourContext, type TourStep } from '@persianstudio/tourara';
 
 const steps: TourStep[] = [
   {
@@ -63,7 +63,7 @@ const steps: TourStep[] = [
 
 function PageTour() {
   useTour({ tourOptions: { steps }, openImmediately: true });
-  const { setTourProps } = useTourStore();
+  const { setTourProps } = useTourContext();
   return (
     <button type="button" onClick={() => setTourProps({ isOpen: true })}>
       Start tour
@@ -73,11 +73,11 @@ function PageTour() {
 
 export function App() {
   return (
-    <>
+    <TourProvider>
       <TourHost />
       <PageTour />
       <nav data-tour="nav">…</nav>
-    </>
+    </TourProvider>
   );
 }
 ```
@@ -125,7 +125,7 @@ export function App() {
 |--------|------|
 | `Tour` | تور کنترل‌شده |
 | `TourHost` | میزبان متصل به store |
-| `useTour` / `useTourStore` | ثبت مراحل و باز کردن تور |
+| `useTour` / `useTourContext` | ثبت مراحل و باز کردن تور |
 | `direction` | `'ltr'` (پیش‌فرض) یا `'rtl'` |
 | `CardinalOrientation` | enum جایگذاری |
 | `conditionalTourAction` و … | هلپرهای DOM |

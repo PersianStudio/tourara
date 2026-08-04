@@ -7,7 +7,7 @@ This document explains how **tourara** is organized so new contributors can navi
 ```text
 tourara/
 ├── src/                 # Publishable library (@persianstudio/tourara)
-├── showcase/            # GitHub Pages demo app
+├── showcase/            # GitHub Pages demo app (may use MUI for the demo shell only)
 ├── docs/                # Contributor & deep-dive docs (this folder)
 ├── README.md            # English user docs (default)
 ├── README.fa.md         # Persian user docs
@@ -19,31 +19,32 @@ tourara/
 ```text
 App / Showcase
     │
-    ├─ TourHost  ──reads──► tourStore (zustand)
+    ├─ TourProvider  (React Context — no Zustand)
+    │       │
+    ├─ TourHost  ──reads──► context { tourProps, setTourProps }
     │                          ▲
     │                          │ useTour / setTourProps
     │                          │
     └─ Tour (controlled or via host)
             │
-            ├─ Mask          SVG spotlight
-            ├─ Tooltip/*     Default chrome (RTL-aware)
+            ├─ Mask          SVG spotlight (HTML/CSS theme via data-theme)
+            ├─ Tooltip/*     Default chrome (plain HTML + CSS variables)
             ├─ Tip/*         Inactive step markers
-            └─ hooks         positioning, visibility, scroll lock
+            └─ hooks         positioning, settle, scroll lock
 ```
 
 | Area | Responsibility |
 |------|----------------|
+| `context/` | `TourProvider` + `useTourContext` (Zustand replacement) |
 | `components/Tour/` | Orchestrates open state, step index, portal, keyboard, scroll lock |
 | `components/Tooltip/` | Default tooltip UI (header / body / footer / stepper) |
 | `components/Tip/` | Tip markers on non-active visible targets |
 | `components/Mask/` | SVG cutout overlay |
-| `components/TourHost/` | Store-bound wrapper around `Tour` |
+| `components/TourHost/` | Context-bound wrapper around `Tour` |
 | `hooks/useUpdateTour/` | Placement loop, listeners, ultra-fast settle |
-| `hooks/` | `useTour`, visibility detection |
-| `store/` | Global tour props for `TourHost` |
+| `styles/` | Default chrome CSS + one-time inject |
 | `utils/positioning/` | Orientation candidates + best placement |
 | `utils/tour/` | Debounce, focus trap, listeners, `shouldUpdate` |
-| `utils/` | DOM geometry, direction, scroll lock, tour actions |
 | `types/` | Public TypeScript contracts |
 | `constants/` | Defaults and DOM id prefixes |
 
@@ -53,11 +54,9 @@ Consumers should import only from `@persianstudio/tourara` (see `src/index.ts`).
 
 Internal folder moves are allowed as long as **`src/index.ts` exports stay compatible**.
 
-## Direction (LTR / RTL)
+## Dependencies
 
-- Default: `direction: 'ltr'` and English chrome labels.
-- RTL mirrors east/west placement preferences and flips chevrons / arrow-key order.
-- Locale strings are **not** auto-translated; pass `finishBtnText`, `skipBtnText`, etc.
+Library peers: **react** + **react-dom** only. Showcase may use MUI for the demo page chrome; that must not leak into `src/`.
 
 ## Tip markers
 

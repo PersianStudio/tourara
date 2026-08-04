@@ -1,8 +1,7 @@
 /**
  * SVG overlay that dims the viewport and cuts out the highlighted target.
- * Optionally blocks interaction / closes the tour on outside click.
+ * Theme-aware via prefers-color-scheme / data-theme — no MUI.
  */
-import { useTheme } from '@mui/material';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import type { Dims, ElementInfo } from '../../utils/dom';
@@ -21,6 +20,45 @@ export interface MaskOptions {
   disableMask?: boolean;
 }
 
+function useIsDarkMode(): boolean {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document !== 'undefined') {
+      const attr = document.documentElement.getAttribute('data-theme');
+      if (attr === 'dark') return true;
+      if (attr === 'light') return false;
+    }
+    return typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+      : true;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const sync = () => {
+      const attr = document.documentElement.getAttribute('data-theme');
+      if (attr === 'dark') {
+        setIsDark(true);
+        return;
+      }
+      if (attr === 'light') {
+        setIsDark(false);
+        return;
+      }
+      setIsDark(mq.matches);
+    };
+    sync();
+    mq.addEventListener('change', sync);
+    const mo = new MutationObserver(sync);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    return () => {
+      mq.removeEventListener('change', sync);
+      mo.disconnect();
+    };
+  }, []);
+
+  return isDark;
+}
+
 export function Mask(props: MaskOptions) {
   const {
     targetInfo,
@@ -34,8 +72,7 @@ export function Mask(props: MaskOptions) {
     disableMask,
   } = props;
   const pathId = `clip-path-${maskId}`;
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const isDark = useIsDarkMode();
 
   const [{ width: containerWidth, height: containerHeight }, setContainerDims] = useState<Dims>(
     getViewportScrollDims(tourRoot),

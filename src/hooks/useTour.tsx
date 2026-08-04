@@ -1,9 +1,9 @@
 /**
- * Hook that registers tour options into the shared store on mount.
+ * Hook that registers tour options into the shared context on mount.
  */
 
 import { useEffect } from 'react';
-import { useTourStore } from '../store/tourStore';
+import { useTourContext } from '../context/TourContext';
 import type { TourProps } from '../types';
 
 export interface UseTourOptions {
@@ -15,10 +15,11 @@ export interface UseTourOptions {
 }
 
 /**
- * Registers tour steps / options into the shared tour store on mount.
+ * Registers tour steps / options into the shared tour context on mount.
+ * Requires `<TourProvider>`.
  */
 export function useTour({ tourOptions, delay = 100, openImmediately = false }: UseTourOptions) {
-  const { setTourProps: setStoreTourProps, tourProps } = useTourStore();
+  const { setTourProps: setStoreTourProps, tourProps } = useTourContext();
 
   useEffect(() => {
     if (openImmediately) {

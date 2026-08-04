@@ -7,10 +7,11 @@ User-facing guide: [README.md](../README.md). This page is a **contributor-orien
 ```ts
 import {
   Tour,
+  TourProvider,
   TourHost,
   useTour,
-  useTourStore,
-  createTourStore,
+  useTourContext,
+  useTourStore, // alias of useTourContext
   Mask,
   Tooltip,
   Tip,
@@ -43,21 +44,21 @@ import type {
 
 | Export | Mode | Notes |
 |--------|------|--------|
-| `Tour` | Controlled | Pass `isOpen`, `steps`, prefer `onClose` |
-| `TourHost` | Store-bound | Mount once; pages call `useTour` / `setTourProps` |
-| `Tooltip` | Default chrome | Replace via `customTooltipRenderer` |
+| `TourProvider` | Context | Required for host / `useTour` / `useTourContext` |
+| `Tour` | Controlled | Pass `isOpen`, `steps`, prefer `onClose` (no provider needed) |
+| `TourHost` | Context-bound | Mount once under provider; pages call `useTour` / `setTourProps` |
+| `Tooltip` | Default chrome | Plain HTML/CSS; replace via `customTooltipRenderer` |
 | `Tip` | Markers | Inactive steps; viewport-fixed |
 | `Mask` | Overlay | Replace via `renderMask` |
 
-## Hooks & store
+## Hooks & context
 
 | Export | Role |
 |--------|------|
-| `useTour` | Write steps/options into the store on mount |
-| `useTourStore` | Global `{ tourProps, setTourProps }` |
-| `createTourStore` | Isolated store factory |
+| `useTour` | Write steps/options into context on mount |
+| `useTourContext` / `useTourStore` | `{ tourProps, setTourProps }` |
 | `useUpdateTour` | Internal positioning loop (advanced) |
-| `useDetectVisibility` | MutationObserver visibility (advanced) |
+| `useDetectVisibility` | IntersectionObserver visibility (advanced) |
 
 ## Option groups (`TourOptions` / per-step)
 
@@ -68,6 +69,7 @@ import type {
 | Tips | `disableTips`, `tipOrientationPreferences` |
 | Placement | `orientationPreferences`, `tooltipSeparation` |
 | Chrome | `noFooter`, `noStepper`, `finishBtnText`, `skipBtnText`, `corner` |
+| Style | `tooltipContainerStyle`, `contentContainerStyle`, CSS variables |
 | Slots | `customTooltipRenderer`, `customFooterRenderer`, `customNextFunc` |
 | Behavior | `nextOnTargetClick`, `movingTarget`, `updateInterval` (≥200ms), `disableAutoScroll`, `allowForeignTarget` |
 

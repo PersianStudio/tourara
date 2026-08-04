@@ -1,9 +1,9 @@
 /**
  * Tour configuration types: shared options, per-step config, and `<Tour />` props.
+ * Styling uses plain CSS / React style objects — no MUI dependency.
  */
 
-import type { SxProps, Theme } from '@mui/material';
-import type { ReactElement, ReactNode } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import type { MaskOptions } from '../components/Mask';
 import type { TourDirection } from '../utils/direction';
 import type { CardinalOrientation, OrientationCoords } from '../utils/positioning';
@@ -19,9 +19,11 @@ export interface TourOptions {
   disableCloseOnClick?: boolean;
   orientationPreferences?: CardinalOrientation[];
   tipOrientationPreferences?: CardinalOrientation[];
-  tooltipMaxWidth?: string | number | { xs: number; sm: number; md: number; lg: number; xl: number };
+  /** Max width for the default tooltip shell (CSS length or number as px). */
+  tooltipMaxWidth?: string | number;
   maskPadding?: number;
   maskRadius?: number;
+  /** Border radius in px for the default tooltip card. */
   tooltipBorderRadius?: number;
   tooltipSeparation?: number;
   noFooter?: boolean;
@@ -33,9 +35,11 @@ export interface TourOptions {
   imageBtnText?: string;
   noStepper?: boolean;
   transition?: string;
-  contentContainerSx?: SxProps<Theme>;
+  /** Inline styles for the default tooltip body scroll area. */
+  contentContainerStyle?: CSSProperties;
   corner?: 'none' | 'small';
-  tooltipContainerSx?: SxProps<Theme>;
+  /** Inline styles for the positioned tooltip shell. */
+  tooltipContainerStyle?: CSSProperties;
   customTitleRenderer?: (tourLogic?: TourLogic) => ReactNode;
   customContentRenderer?: (tourLogic?: TourLogic) => ReactNode;
   customFooterRenderer?: (tourLogic?: TourLogic) => ReactNode;

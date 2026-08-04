@@ -4,16 +4,16 @@ const SNIPPETS = [
   {
     id: 'install',
     title: '1. Install',
-    blurb: 'Add tourara plus MUI peers (React 18+).',
+    blurb: 'Add tourara (React 18+). No MUI / Zustand required — peers are only react and react-dom.',
     language: 'bash',
     filename: 'terminal',
-    code: `pnpm add @persianstudio/tourara @mui/material @emotion/react @emotion/styled
+    code: `pnpm add @persianstudio/tourara
 
 # npm
-npm install @persianstudio/tourara @mui/material @emotion/react @emotion/styled
+npm install @persianstudio/tourara
 
 # yarn
-yarn add @persianstudio/tourara @mui/material @emotion/react @emotion/styled`,
+yarn add @persianstudio/tourara`,
   },
   {
     id: 'anchors',
@@ -51,14 +51,15 @@ export const steps: TourStep[] = [
   },
   {
     id: 'host',
-    title: '4. TourHost + useTour',
-    blurb: 'Mount the host once. Register steps on the page, then open the tour.',
+    title: '4. TourProvider + TourHost',
+    blurb: 'Wrap once with TourProvider. Mount TourHost. Register steps, then open the tour.',
     language: 'tsx',
     filename: 'App.tsx',
     code: `import {
+  TourProvider,
   TourHost,
   useTour,
-  useTourStore,
+  useTourContext,
   type TourStep,
 } from '@persianstudio/tourara';
 import { steps } from './tourSteps';
@@ -69,7 +70,7 @@ function PageTour() {
     openImmediately: true,
   });
 
-  const { setTourProps } = useTourStore();
+  const { setTourProps } = useTourContext();
 
   return (
     <button type="button" onClick={() => setTourProps({ isOpen: true })}>
@@ -80,20 +81,20 @@ function PageTour() {
 
 export function App() {
   return (
-    <>
+    <TourProvider>
       {/* Optional: clear tour when the route changes */}
       <TourHost resetKey={location.pathname} />
       <PageTour />
       <nav data-tour="nav">Home</nav>
       <button data-tour="cta">Save</button>
-    </>
+    </TourProvider>
   );
 }`,
   },
   {
     id: 'controlled',
     title: '5. Controlled Tour',
-    blurb: 'No store — own isOpen / onClose yourself (modals, tests, feature flags).',
+    blurb: 'No shared context — own isOpen / onClose yourself (modals, tests, feature flags).',
     language: 'tsx',
     filename: 'ControlledTour.tsx',
     code: `import { useState } from 'react';
@@ -215,7 +216,8 @@ export function SetupGuide({ onStartSetupTour }: { onStartSetupTour: () => void 
       <div className="section-head">
         <h2 data-tour="setup-heading">Setup guidance</h2>
         <p>
-          From install to a running tour — copy each snippet into your app. Prefer <code>TourHost</code> for multi-page
+          From install to a running tour — copy each snippet into your app. Prefer{' '}
+          <code>TourProvider</code> + <code>TourHost</code> for multi-page apps.
           products; use controlled <code>Tour</code> when you already own open state.
         </p>
         <button type="button" className="btn btn-yellow btn-compact" data-tour="setup-tour-btn" onClick={onStartSetupTour}>
@@ -224,7 +226,7 @@ export function SetupGuide({ onStartSetupTour }: { onStartSetupTour: () => void 
       </div>
 
       <ol className="setup-checklist" data-tour="setup-checklist">
-        <li>Install package + MUI peers</li>
+        <li>Install package (React peers only)</li>
         <li>
           Add <code>data-tour</code> anchors
         </li>

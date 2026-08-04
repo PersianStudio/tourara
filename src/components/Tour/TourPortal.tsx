@@ -1,4 +1,7 @@
-import { Box, type SxProps, type Theme } from '@mui/material';
+/**
+ * Portal host that paints the mask, tooltip, and tip markers into
+ * the tour root (or inline until the root is known).
+ */
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { baseMaskString, basePortalString, baseTooltipContainerString } from '../../constants';
@@ -19,7 +22,7 @@ export interface TourPortalProps {
   tooltipPosition: OrientationCoords | undefined;
   transition?: string;
   tooltipMaxWidth?: TourOptions['tooltipMaxWidth'];
-  tooltipContainerSx?: TourOptions['tooltipContainerSx'];
+  tooltipContainerStyle?: TourOptions['tooltipContainerStyle'];
   customTooltipRenderer?: TourOptions['customTooltipRenderer'];
   disableMaskInteraction?: boolean;
   disableCloseOnClick?: boolean;
@@ -37,10 +40,6 @@ export interface TourPortalProps {
   tooltipRef: React.MutableRefObject<HTMLElement | undefined>;
 }
 
-/**
- * Portal host that paints the mask, tooltip, and tip markers into
- * the tour root (or inline until the root is known).
- */
 export function TourPortal({
   direction,
   identifier,
@@ -50,7 +49,7 @@ export function TourPortal({
   tooltipPosition,
   transition,
   tooltipMaxWidth,
-  tooltipContainerSx,
+  tooltipContainerStyle,
   customTooltipRenderer,
   disableMaskInteraction,
   disableCloseOnClick,
@@ -69,39 +68,17 @@ export function TourPortal({
 }: TourPortalProps) {
   const MaskTag = renderMask ? renderMask : Mask;
 
-  const tooltipContainerStyle: SxProps<Theme> = {
-    position: 'absolute',
-    top: tooltipPosition?.coords.y ?? 16,
-    left: tooltipPosition?.coords.x ?? 16,
-    transition: transition,
-    zIndex: 10000,
-    pointerEvents: 'auto',
-    outline: 'none',
-    ...(!customTooltipRenderer && {
-      maxWidth: tooltipMaxWidth || { xs: 'calc(100vw - 24px)', sm: 360, md: 400, lg: 440 },
-      width: 'max-content',
-      minWidth: { xs: 0, sm: 260 },
-      boxSizing: 'border-box',
-    }),
-    ...tooltipContainerSx,
-  };
-
-  // Must cover the viewport explicitly. Absolute tooltip children do not expand
-  // this box; when `disableMask` is true there is no SVG either — without size +
-  // overflow:hidden the tooltip is clipped to 0×0 and appears to "do nothing".
-  const portalStyle: SxProps<Theme> = {
-    position: 'fixed',
-    overflow: 'hidden',
-    inset: 0,
-    width: '100vw',
-    height: '100vh',
-    zIndex: zIndex,
-    visibility: 'visible',
-    pointerEvents: 'none',
-  };
+  const maxWidth =
+    typeof tooltipMaxWidth === 'number' ? `${tooltipMaxWidth}px` : tooltipMaxWidth || undefined;
 
   const content = (
-    <Box ref={portalRef} id={getIdString(basePortalString, identifier)} sx={portalStyle} dir={direction}>
+    <div
+      ref={portalRef as React.RefObject<HTMLDivElement>}
+      id={getIdString(basePortalString, identifier)}
+      className="tourara-portal"
+      style={{ zIndex }}
+      dir={direction}
+    >
       {tourRoot && (
         <MaskTag
           maskId={getIdString(baseMaskString, identifier)}
@@ -117,16 +94,23 @@ export function TourPortal({
       )}
 
       {tourRoot && (
-        <Box
-          ref={tooltipRef}
+        <div
+          ref={tooltipRef as React.RefObject<HTMLDivElement>}
           id={getIdString(baseTooltipContainerString, identifier)}
-          sx={tooltipContainerStyle}
+          className="tourara-tooltip-shell"
+          style={{
+            top: tooltipPosition?.coords.y ?? 16,
+            left: tooltipPosition?.coords.x ?? 16,
+            transition,
+            maxWidth,
+            ...tooltipContainerStyle,
+          }}
           onKeyDown={keyPressHandler}
           tabIndex={0}
           dir={direction}
         >
           {customTooltipRenderer ? customTooltipRenderer(tourLogic) : <Tooltip {...tourLogic} tooltipRef={tooltipRef} />}
-        </Box>
+        </div>
       )}
 
       {tourRoot && !disableTips && (
@@ -141,7 +125,7 @@ export function TourPortal({
           tooltipRef={tooltipRef}
         />
       )}
-    </Box>
+    </div>
   );
 
   return tourRoot ? ReactDOM.createPortal(content, getValidPortalRoot(tourRoot)) : content;

@@ -13,7 +13,7 @@ const CAPABILITIES = [
   },
   {
     title: 'Store or controlled',
-    body: 'TourHost + useTour for apps, or <Tour /> with local open state.',
+    body: 'TourProvider + TourHost + useTour for apps, or controlled <Tour /> with local open state.',
   },
   {
     title: 'Interactive steps',

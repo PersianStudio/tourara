@@ -10,7 +10,7 @@ export function ControlledDemo() {
       <div className="section-head">
         <h2>Controlled mode</h2>
         <p>
-          Same engine without the Zustand store — pass <code>isOpen</code> and <code>onClose</code> to{' '}
+          Same engine without the shared context — pass <code>isOpen</code> and <code>onClose</code> to{' '}
           <code>{'<Tour />'}</code>.
         </p>
       </div>

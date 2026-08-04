@@ -8,7 +8,7 @@ export const tourDefaultProps: Partial<TourProps> = {
   maskPadding: 5,
   maskRadius: 2,
   tooltipSeparation: 8,
-  tooltipBorderRadius: 1,
+  tooltipBorderRadius: 8,
   transition: 'top 160ms ease, left 160ms ease',
   disableMaskInteraction: false,
   disableCloseOnClick: false,

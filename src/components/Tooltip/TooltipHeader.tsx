@@ -1,7 +1,6 @@
 /**
  * Tooltip title row with optional audio control and close button.
  */
-import { Box, Divider, IconButton, Stack, Typography } from '@mui/material';
 import { CloseIcon, VolumeIcon } from '../../icons';
 import type { TourLogic } from '../../types';
 
@@ -14,10 +13,6 @@ interface TooltipHeaderProps {
   close: TourLogic['close'];
 }
 
-/**
- * Sticky title row with optional audio indicator and close button.
- * Renders a divider beneath the header when a title is present.
- */
 export function TooltipHeader({ tourLogic, title, audio, noCloseIcon, closeAria, close }: TooltipHeaderProps) {
   if (!title) {
     return null;
@@ -25,34 +20,30 @@ export function TooltipHeader({ tourLogic, title, audio, noCloseIcon, closeAria,
 
   return (
     <>
-      <Box sx={{ px: { xs: 1.5, sm: 2 }, py: 1.25, width: '100%', zIndex: 10001, position: 'sticky' }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
-            {typeof title === 'string' ? (
-              <Typography
-                variant="subtitle1"
-                color="inherit"
-                noWrap
-                sx={{ fontWeight: 700, fontSize: { xs: '0.95rem', sm: '1.05rem' } }}
-              >
-                {title}
-              </Typography>
-            ) : typeof title === 'function' ? (
-              title(tourLogic)
-            ) : (
-              title
-            )}
-            {audio && <VolumeIcon style={{ fontSize: 18, opacity: 0.9, flexShrink: 0 }} />}
-          </Stack>
-
-          {!noCloseIcon && (
-            <IconButton onClick={() => close()} size="small" aria-label={closeAria} sx={{ color: 'inherit', p: 0.5 }}>
-              <CloseIcon />
-            </IconButton>
+      <div className="tourara-tooltip-header">
+        <div className="tourara-tooltip-header-main">
+          {typeof title === 'string' ? (
+            <h2 className="tourara-tooltip-title">{title}</h2>
+          ) : typeof title === 'function' ? (
+            title(tourLogic)
+          ) : (
+            title
           )}
-        </Stack>
-      </Box>
-      <Divider variant="fullWidth" sx={{ m: 0, borderColor: 'grey.800' }} />
+          {audio && <VolumeIcon style={{ fontSize: 18, opacity: 0.9, flexShrink: 0 }} />}
+        </div>
+
+        {!noCloseIcon && (
+          <button
+            type="button"
+            className="tourara-icon-btn is-plain"
+            onClick={() => close()}
+            aria-label={closeAria}
+          >
+            <CloseIcon />
+          </button>
+        )}
+      </div>
+      <hr className="tourara-tooltip-divider" />
     </>
   );
 }

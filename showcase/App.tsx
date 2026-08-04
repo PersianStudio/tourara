@@ -17,12 +17,12 @@ import { Hero } from './sections/Hero';
 import { ScrollDeepSection } from './sections/ScrollDeepSection';
 import { useColorMode } from './theme';
 
-/** Shared defaults for store-driven tours started from the showcase. */
+/** Shared defaults for context-driven tours started from the showcase. */
 const TOUR_BASE = {
   maskPadding: 6,
   maskRadius: 2,
   corner: 'small' as const,
-  tooltipBorderRadius: 1,
+  tooltipBorderRadius: 8,
   direction: 'ltr' as TourDirection,
 };
 

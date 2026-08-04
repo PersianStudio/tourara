@@ -1,6 +1,6 @@
 # tourara
 
-**React product-tour toolkit** — SVG spotlight masks, smart tooltip placement, inactive tip markers, keyboard navigation, and a Zustand-backed host for multi-page apps.
+**React product-tour toolkit** — SVG spotlight masks, smart tooltip placement, inactive tip markers, keyboard navigation, and a Context-backed host for multi-page apps. Peers: **React only** (no MUI, no Zustand).
 
 **Languages:** English (default) · [فارسی (README.fa.md)](./README.fa.md)
 
@@ -33,10 +33,10 @@ After searching the ecosystem, we could not find a tour component that satisfied
 - **Smart placement** — 13 cardinal / diagonal orientations; prefers in-view candidates
 - **RTL & LTR** — `direction: 'ltr' | 'rtl'` (default **`ltr`**); east/west preferences mirror in RTL; chrome uses `dir`
 - **Tip markers** — small indicators on other visible steps (capped, rAF-throttled; opt out with `disableTips`)
-- **Store or controlled** — mount `<TourHost />` + `useTour`, or drive `<Tour />` yourself
+- **Context or controlled** — wrap `<TourProvider>` + `<TourHost />` + `useTour`, or drive `<Tour />` yourself
 - **Interactive steps** — `customNextFunc`, `nextOnTargetClick`, DOM helpers for open-dropdown / wait-for-element flows
 - **Keyboard** — `Escape` closes; `←` / `→` navigate (swapped in RTL reading order)
-- **MUI-friendly** — default UI uses `@mui/material`; theme via your existing `ThemeProvider`
+- **Zero UI peers** — default chrome is plain HTML/CSS (theme via CSS variables); swap with `customTooltipRenderer` / `renderMask`
 - **No router lock-in** — optional `resetKey` instead of a hard `react-router` dependency
 
 Default **copy is English**. Pass your own `finishBtnText` / `skipBtnText` / labels for other locales (see Persian demo on the showcase).
@@ -48,17 +48,15 @@ Default **copy is English**. Pass your own `finishBtnText` / `skipBtnText` / lab
 | Peer | Versions |
 |------|----------|
 | `react` / `react-dom` | `^18` or `^19` |
-| `@mui/material` | `^5` or `^6` |
-| `@emotion/react` / `@emotion/styled` | `^11` |
 
-Runtime dependency: `zustand` (bundled with the package).
+No other runtime dependencies. Default styles inject automatically; optional override file: `@persianstudio/tourara/styles.css`.
 
 ---
 
 ## Install
 
 ```bash
-pnpm add @persianstudio/tourara @mui/material @emotion/react @emotion/styled
+pnpm add @persianstudio/tourara
 # or: npm / yarn
 ```
 
@@ -70,7 +68,7 @@ pnpm add github:PersianStudio/tourara
 pnpm link --global   # inside tourara after pnpm build
 ```
 
-Wrap your app in MUI’s `ThemeProvider` (and usually `CssBaseline`) so mask colors and tooltip styles pick up `palette.mode` / `primary`.
+Theme the default chrome with CSS variables (`--tourara-accent`, `--tourara-bg`, …) or replace it entirely with slots.
 
 ---
 
@@ -85,15 +83,16 @@ Wrap your app in MUI’s `ThemeProvider` (and usually `CssBaseline`) so mask col
 
 Any CSS selector works (`#id`, `.class`, `[data-tour="…"]`, etc.).
 
-### 2. Store-backed host (recommended for apps)
+### 2. Context-backed host (recommended for apps)
 
-Mount **one** host near the root. Pages register steps; a button (or effect) opens the tour.
+Wrap once with **TourProvider**. Mount **one** host. Pages register steps; a button (or effect) opens the tour.
 
 ```tsx
 import {
+  TourProvider,
   TourHost,
   useTour,
-  useTourStore,
+  useTourContext,
   type TourStep,
 } from '@persianstudio/tourara';
 
@@ -111,13 +110,12 @@ const steps: TourStep[] = [
 ];
 
 function PageTour() {
-  // Registers steps into the store (does not open by itself unless isOpen: true)
   useTour({
     tourOptions: { steps },
     openImmediately: true,
   });
 
-  const { setTourProps } = useTourStore();
+  const { setTourProps } = useTourContext();
 
   return (
     <button type="button" onClick={() => setTourProps({ isOpen: true })}>
@@ -128,13 +126,12 @@ function PageTour() {
 
 export function App() {
   return (
-    <>
-      {/* Clear steps when the route changes */}
+    <TourProvider>
       <TourHost resetKey={window.location.pathname} />
       <PageTour />
       <nav data-tour="nav">Home</nav>
       <button data-tour="cta">Save</button>
-    </>
+    </TourProvider>
   );
 }
 ```
@@ -239,7 +236,8 @@ Missing selectors are **skipped** when navigating next/prev so tours stay robust
 | Export | Description |
 |--------|-------------|
 | `Tour` | Controlled overlay. Pass `steps`, `isOpen`, and usually `onClose`. |
-| `TourHost` | Reads `useTourStore` and renders `Tour`. Mount once. Optional `resetKey` clears steps and closes when it changes. |
+| `TourProvider` | React Context for shared tour props. Wrap the app (or a subtree). |
+| `TourHost` | Reads context and renders `Tour`. Mount once under the provider. Optional `resetKey` clears steps and closes when it changes. |
 | `Mask` | Default SVG spotlight (also overridable via `renderMask`). |
 | `Tooltip` | Default step chrome (title, content, stepper, footer). |
 | `Tip` | Inactive-step marker near other visible targets. |
@@ -249,7 +247,7 @@ Missing selectors are **skipped** when navigating next/prev so tours stay robust
 | Export | Description |
 |--------|-------------|
 | `useTour({ tourOptions, delay?, openImmediately? })` | Writes `tourOptions` into the store on mount (after `delay` ms, default `100`). Returns `{ tourProps, setTourProps }`. |
-| `useTourStore` | Zustand store: `{ tourProps, setTourProps }`. |
+| `useTourContext` / `useTourStore` | Context API: `{ tourProps, setTourProps }` (`useTourStore` is an alias). |
 | `createTourStore(initial?)` | Factory for an isolated store instance (advanced). |
 | `useUpdateTour` / `useDetectVisibility` | Internal positioning / visibility hooks (exported for advanced forks). |
 
@@ -301,7 +299,8 @@ Options can be set on the **tour** (`Tour` / store props) and **overridden per s
 | `tooltipMaxWidth` | responsive | Number, string, or MUI breakpoint map. |
 | `tooltipSeparation` | `0` | Extra distance from the target. |
 | `tooltipBorderRadius` | — | Tooltip radius (MUI spacing units in default UI). |
-| `tooltipContainerSx` / `contentContainerSx` | — | MUI `sx` overrides. |
+| `tooltipContainerStyle` / `contentContainerStyle` | — | Plain React `CSSProperties` overrides. |
+| `disableTips` | `false` | Skip inactive tip markers. |
 | `transition` | `top/left 300ms ease` | Tooltip move transition. |
 | `zIndex` | `10000` | Portal stacking. |
 | `rootSelector` | — | Scroll / portal root; otherwise nearest scroll ancestor. |
@@ -410,7 +409,7 @@ Tourara reads the ambient MUI theme:
 - Tip markers use `palette.primary`
 - Default tooltip uses neutral `grey.*` surfaces
 
-Override appearance with `tooltipContainerSx`, `contentContainerSx`, or `customTooltipRenderer` / `renderMask` without forking the package.
+Override appearance with CSS variables (`--tourara-accent`, `--tourara-bg`, …), `tooltipContainerStyle` / `contentContainerStyle`, or `customTooltipRenderer` / `renderMask` without forking the package.
 
 ---
 

@@ -1,5 +1,9 @@
+/**
+ * Context-bound tour host. Mount once under `<TourProvider>`.
+ * Feature pages register steps via `useTour` / `useTourContext`.
+ */
 import { useEffect } from 'react';
-import { useTourStore } from '../../store/tourStore';
+import { useTourContext } from '../../context/TourContext';
 import { Tour } from '../Tour';
 
 export interface TourHostProps {
@@ -10,12 +14,8 @@ export interface TourHostProps {
   resetKey?: string | number;
 }
 
-/**
- * Store-bound tour host. Mount once near the app root.
- * Feature pages register steps via `useTour` / `useTourStore`.
- */
 export function TourHost({ resetKey }: TourHostProps) {
-  const { tourProps, setTourProps } = useTourStore();
+  const { tourProps, setTourProps } = useTourContext();
 
   useEffect(() => {
     if (resetKey === undefined) return;

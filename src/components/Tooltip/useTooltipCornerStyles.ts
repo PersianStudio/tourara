@@ -1,7 +1,7 @@
 /**
  * Hook that derives tooltip + SVG corner styles from orientation and DOM targets.
  */
-import type { SxProps, Theme } from '@mui/material';
+import type { CSSProperties } from 'react';
 import * as React from 'react';
 import type { TourStep } from '../../types';
 import type { OrientationCoords } from '../../utils/positioning';
@@ -15,10 +15,6 @@ interface UseTooltipCornerStylesArgs {
   corner: TourStep['corner'];
 }
 
-/**
- * Debounced effect that positions the tooltip corner SVG against the target element.
- * Returns MUI `sx` for the tooltip shell and the corner graphic.
- */
 export function useTooltipCornerStyles({
   tooltipPosition,
   stepIndex,
@@ -27,15 +23,17 @@ export function useTooltipCornerStyles({
   corner,
 }: UseTooltipCornerStylesArgs) {
   const [cornerStyles, setCornerStyles] = React.useState<{
-    style: SxProps<Theme>;
-    svgStyle: SxProps<Theme>;
+    style: CSSProperties;
+    svgStyle: CSSProperties;
   }>();
 
   React.useEffect(() => {
     let debounceTimer: ReturnType<typeof setTimeout>;
 
     const applyStyles = () => {
-      const target = window.document.querySelector(allSteps?.[stepIndex]?.selector) as HTMLElement | undefined;
+      const target = window.document.querySelector(allSteps?.[stepIndex]?.selector) as
+        | HTMLElement
+        | undefined;
       const cornerStyle = getCornerStyles(tooltipPosition?.orientation, target, tooltipRef.current, corner);
       setCornerStyles(cornerStyle);
     };

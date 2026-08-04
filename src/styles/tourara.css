@@ -1,0 +1,293 @@
+/**
+ * Default tour chrome styles (no MUI).
+ * Imported once from the package entry so consumers get styles automatically.
+ */
+
+:root {
+  --tourara-bg: #101826;
+  --tourara-fg: #e8eefc;
+  --tourara-muted: #9bb0d0;
+  --tourara-border: #243044;
+  --tourara-surface: #1a2436;
+  --tourara-accent: #3b82f6;
+  --tourara-accent-contrast: #0b1220;
+  --tourara-warning: #f5c542;
+  --tourara-radius: 8px;
+  --tourara-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+.tourara-portal {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  visibility: visible;
+  pointer-events: none;
+  font-family: var(--tourara-font);
+}
+
+.tourara-tooltip-shell {
+  position: absolute;
+  z-index: 10000;
+  pointer-events: auto;
+  outline: none;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: min(260px, calc(100vw - 24px));
+  max-width: min(400px, calc(100vw - 24px));
+}
+
+.tourara-tooltip {
+  position: relative;
+  background: var(--tourara-bg);
+  color: var(--tourara-fg);
+  border-radius: var(--tourara-radius);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  max-width: 100%;
+}
+
+.tourara-tooltip[dir='rtl'] {
+  text-align: right;
+}
+
+.tourara-tooltip[dir='ltr'] {
+  text-align: left;
+}
+
+.tourara-tooltip-corner {
+  position: absolute;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.tourara-tooltip-corner svg path {
+  fill: var(--tourara-bg) !important;
+}
+
+.tourara-tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  position: sticky;
+  z-index: 10001;
+}
+
+.tourara-tooltip-header-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tourara-tooltip-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tourara-tooltip-divider {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: var(--tourara-border);
+}
+
+.tourara-tooltip-body-wrap {
+  padding: 10px 16px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tourara-tooltip-body {
+  overflow: auto;
+  max-height: 22vh;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  opacity: 0.92;
+}
+
+.tourara-tooltip-body p {
+  margin: 0;
+}
+
+.tourara-tooltip-media {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.tourara-tooltip-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tourara-tooltip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #6b7c99;
+  flex: 0 0 auto;
+}
+
+.tourara-tooltip-dot.is-active {
+  width: 28px;
+  border-radius: 4px;
+  background: var(--tourara-warning);
+}
+
+.tourara-tooltip-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 16px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  position: sticky;
+  z-index: 10001;
+}
+
+.tourara-tooltip-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tourara-btn {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.2;
+  max-height: 32px;
+}
+
+.tourara-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.tourara-btn-primary {
+  background: var(--tourara-accent);
+  color: var(--tourara-accent-contrast);
+}
+
+.tourara-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.tourara-btn-ghost {
+  background: var(--tourara-surface);
+  color: var(--tourara-fg);
+}
+
+.tourara-btn-ghost:hover:not(:disabled) {
+  background: #243044;
+}
+
+.tourara-icon-btn {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #243044;
+  color: #c5d0e6;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tourara-icon-btn:hover:not(:disabled) {
+  background: #2f3f5a;
+}
+
+.tourara-icon-btn:disabled {
+  background: #151c2a;
+  color: #4a5870;
+  cursor: not-allowed;
+}
+
+.tourara-icon-btn.is-plain {
+  background: transparent;
+  color: inherit;
+}
+
+.tourara-icon-btn.is-plain:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tourara-tip {
+  position: fixed;
+  z-index: 10001;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: pointer;
+  box-sizing: border-box;
+  border: 2px solid #0b1220;
+  background: #0b1220;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tourara-tip-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--tourara-accent);
+  color: var(--tourara-accent-contrast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .tourara-tooltip-shell {
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+  }
+
+  .tourara-tooltip-title {
+    font-size: 0.95rem;
+  }
+
+  .tourara-tooltip-body {
+    max-height: 28vh;
+    font-size: 0.875rem;
+  }
+
+  .tourara-tooltip-header,
+  .tourara-tooltip-body-wrap,
+  .tourara-tooltip-stepper,
+  .tourara-tooltip-footer {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}

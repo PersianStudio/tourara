@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { TourProvider } from '@persianstudio/tourara';
 import { App } from './App';
 import { ColorModeProvider } from './theme';
 import './styles.css';
@@ -7,7 +8,9 @@ import './styles.css';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ColorModeProvider>
-      <App />
+      <TourProvider>
+        <App />
+      </TourProvider>
     </ColorModeProvider>
   </StrictMode>,
 );

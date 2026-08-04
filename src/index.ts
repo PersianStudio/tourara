@@ -12,8 +12,13 @@ export type { TourStep, TourLogic, TourOptions, TourProps, TourDirection } from 
 export { useTour, useUpdateTour, useDetectVisibility } from './hooks';
 export type { UseTourOptions } from './hooks/useTour';
 
-export { useTourStore, createTourStore } from './store/tourStore';
-export type { TourState } from './store/tourStore';
+export {
+  TourProvider,
+  useTourContext,
+  useTourStore,
+  createTourStore,
+} from './context/TourContext';
+export type { TourState, TourContextValue, TourProviderProps } from './context/TourContext';
 
 export { CardinalOrientation } from './utils/positioning';
 export type { Coords, Dims, ElementInfo } from './utils/dom';

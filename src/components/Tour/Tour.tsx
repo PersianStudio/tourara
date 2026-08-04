@@ -2,15 +2,14 @@
  * Guided tour orchestrator: owns step state, wires hooks, and delegates
  * mask/tooltip/tip rendering to {@link TourPortal}.
  *
- * Performance notes:
- * - Tip on-screen checks live in TipLayer (no MutationObserver on the page)
- * - Geometry settle does not rebind listeners every frame
- * - Scroll lock only while the tour is open
+ * Controlled `<Tour />` works without a provider when `onClose` is supplied.
+ * Host mode uses `<TourProvider>` + `<TourHost />`.
  */
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { useOptionalTourContext } from '../../context/TourContext';
 import { useUpdateTour } from '../../hooks';
-import { useTourStore } from '../../store/tourStore';
+import { injectTouraraStyles } from '../../styles/injectStyles';
 import type { TourProps, TourStep } from '../../types';
 import type { OrientationCoords } from '../../utils/positioning';
 import { lockUserScroll } from '../../utils/scrollLock';
@@ -24,12 +23,16 @@ import { useTourStepNavigation } from './useTourStepNavigation';
 export const Tour = (props: TourProps) => {
   const { initialStepIndex, isOpen, resetKey, onClose } = props;
 
+  useEffect(() => {
+    injectTouraraStyles();
+  }, []);
+
   const [steps, setSteps] = useState<TourStep[]>(props.steps || []);
   const [target, setTarget] = React.useState<HTMLElement | undefined>(undefined);
   const [tooltipPosition, setTooltipPosition] = React.useState<OrientationCoords | undefined>(undefined);
   const [currentStepIndex, setCurrentStepIndex] = React.useState<number>(initialStepIndex || 0);
 
-  const { setTourProps } = useTourStore();
+  const { setTourProps } = useOptionalTourContext();
 
   const cleanupRefs = React.useRef<Array<() => void>>([]);
   const tooltip = React.useRef<HTMLElement | undefined>(undefined);
@@ -49,7 +52,7 @@ export const Tour = (props: TourProps) => {
     transition,
     customTooltipRenderer,
     zIndex,
-    tooltipContainerSx,
+    tooltipContainerStyle,
     rootSelector,
     customNextFunc,
     customPrevFunc,
@@ -154,7 +157,7 @@ export const Tour = (props: TourProps) => {
       tooltipPosition={tooltipPosition}
       transition={transition}
       tooltipMaxWidth={tooltipMaxWidth}
-      tooltipContainerSx={tooltipContainerSx}
+      tooltipContainerStyle={tooltipContainerStyle}
       customTooltipRenderer={customTooltipRenderer}
       disableMaskInteraction={disableMaskInteraction}
       disableCloseOnClick={disableCloseOnClick}

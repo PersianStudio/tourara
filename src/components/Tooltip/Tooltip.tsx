@@ -1,8 +1,7 @@
 /**
- * Active-step tooltip chrome: header, body, footer, optional corner graphic,
- * and prev/next affordances positioned from tour logic.
+ * Active-step tooltip chrome: header, body, footer, optional corner graphic.
+ * Plain HTML + CSS — no MUI.
  */
-import { Box, Stack } from '@mui/material';
 import * as React from 'react';
 import { TourTooltipCorner } from '../../assets/TourTooltipCorner';
 import { ChevronLeftIcon, ChevronRightIcon } from '../../icons';
@@ -19,10 +18,6 @@ interface TooltipProps extends TourLogic {
   tooltipRef: React.MutableRefObject<HTMLElement | undefined>;
 }
 
-/**
- * Tour step tooltip shell: corner graphic, header, body, media, stepper, and footer.
- * Composes smaller presentational pieces; RTL flips chevrons and text alignment.
- */
 export function Tooltip(props: TooltipProps) {
   const {
     next,
@@ -47,7 +42,7 @@ export function Tooltip(props: TooltipProps) {
       noCloseIcon,
       noStepper,
       corner,
-      contentContainerSx,
+      contentContainerStyle,
       prevLabel,
       nextLabel,
       closeLabel,
@@ -55,9 +50,7 @@ export function Tooltip(props: TooltipProps) {
     stepIndex,
     allSteps,
     tooltipPosition,
-  } = {
-    ...props,
-  };
+  } = props;
 
   const isRtl = direction === 'rtl';
   const prevIcon = isRtl ? <ChevronRightIcon /> : <ChevronLeftIcon />;
@@ -78,21 +71,17 @@ export function Tooltip(props: TooltipProps) {
     corner,
   });
 
-  const prevDisabled: boolean = stepIndex - 1 < 0;
-  const nextDisabled: boolean = stepIndex + 1 >= allSteps.length;
-  const radius = tooltipBorderRadius ?? 1;
+  const prevDisabled = stepIndex - 1 < 0;
+  const nextDisabled = stepIndex + 1 >= allSteps.length;
+  const radius = tooltipBorderRadius ?? 8;
 
   return (
-    <Box
+    <div
+      className="tourara-tooltip"
       dir={direction}
-      sx={{
+      style={{
         borderRadius: radius,
-        position: 'relative',
         ...cornerStyles?.style,
-        bgcolor: 'grey.900',
-        color: 'common.white',
-        maxWidth: '100%',
-        textAlign: isRtl ? 'right' : 'left',
       }}
     >
       {!(corner === 'none') &&
@@ -102,16 +91,9 @@ export function Tooltip(props: TooltipProps) {
         tooltipPosition.orientation !== CardinalOrientation.NORTH &&
         tooltipPosition.orientation !== CardinalOrientation.SOUTH &&
         tooltipPosition.orientation !== CardinalOrientation.WEST && (
-          <Box
-            sx={{
-              position: 'absolute',
-              zIndex: 10000,
-              '& svg>path': { fill: (theme) => `${theme.palette.grey[900]} !important` },
-              ...cornerStyles?.svgStyle,
-            }}
-          >
+          <div className="tourara-tooltip-corner" style={cornerStyles?.svgStyle}>
             <TourTooltipCorner />
-          </Box>
+          </div>
         )}
 
       <TooltipHeader
@@ -123,10 +105,10 @@ export function Tooltip(props: TooltipProps) {
         close={close}
       />
 
-      <Stack sx={{ px: { xs: 1.5, sm: 2 }, pt: 1.25, width: '100%' }}>
-        <TooltipBody tourLogic={props} content={content} contentContainerSx={contentContainerSx} />
+      <div className="tourara-tooltip-body-wrap">
+        <TooltipBody tourLogic={props} content={content} contentContainerStyle={contentContainerStyle} />
         <TooltipMediaButtons video={video} image={image} videoLabel={videoLabel} imageLabel={imageLabel} />
-      </Stack>
+      </div>
 
       {!noStepper && <TooltipStepper allSteps={allSteps} stepIndex={stepIndex} />}
 
@@ -150,6 +132,6 @@ export function Tooltip(props: TooltipProps) {
           next={next}
         />
       )}
-    </Box>
+    </div>
   );
 }
