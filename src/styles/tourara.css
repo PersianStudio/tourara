@@ -38,6 +38,8 @@
   min-width: min(260px, calc(100vw - 24px));
   max-width: min(400px, calc(100vw - 24px));
   overflow: visible;
+  /* Keep chrome above tip markers so a slip never paints over the card. */
+  isolation: isolate;
 }
 
 .tourara-tooltip {
@@ -249,7 +251,8 @@
 
 .tourara-tip {
   position: fixed;
-  z-index: 10001;
+  /* Below tooltip shell (10000) / caret (10002) — above page content via portal. */
+  z-index: 9990;
   width: 26px;
   height: 26px;
   border-radius: 50%;

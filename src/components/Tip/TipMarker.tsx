@@ -17,7 +17,7 @@ function TipMarkerInner({ x, y, stepIndex, onActivate }: TipMarkerProps) {
     <button
       type="button"
       className="tourara-tip"
-      style={{ top: y, left: x, width: TIP_SIZE, height: TIP_SIZE }}
+      style={{ top: y, left: x, width: TIP_SIZE, height: TIP_SIZE, zIndex: 9990 }}
       onClick={(e) => {
         e.stopPropagation();
         onActivate(stepIndex);

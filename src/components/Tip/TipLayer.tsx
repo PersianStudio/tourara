@@ -1,20 +1,31 @@
 /**
  * Coordinates placement of inactive tip markers with a low resource budget.
  *
- * - No polling interval
- * - Scroll/resize coalesced to one rAF
- * - Cap tips nearest the spotlight
+ * Hard rules:
+ * - Never paint over the active tooltip (obstacle + z-index below chrome)
+ * - Never paint inside the spotlight hole
+ * - Hide a tip entirely when no clear slot exists (no “best effort” overlap)
+ * - Recompute when the tooltip moves (coords + post-transition settle)
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { baseTooltipContainerString } from '../../constants';
 import type { TourStep } from '../../types';
 import { defaultTipOrientations, resolveOrientationPreferences, type TourDirection } from '../../utils/direction';
 import { createFrameScheduler } from '../../utils/frameScheduler';
-import { SIBLING_TARGET_PAD, TIP_SIZE } from './constants';
+import type { OrientationCoords } from '../../utils/positioning';
+import { getIdString } from '../../utils/tour';
+import {
+  SIBLING_TARGET_PAD,
+  TIP_CLEARANCE,
+  TIP_SIZE,
+  TOOLTIP_OBSTACLE_PAD,
+} from './constants';
 import { placeTipMarker, spotlightObstacle, tooltipObstacle } from './placeTipMarker';
 import {
   inflateRect,
   isMostlyInside,
   rectCenterDistance,
+  rectsOverlap,
   tipMarkerRect,
   toTipRect,
   type TipRect,
@@ -32,6 +43,9 @@ export type TipLayerProps = {
   activeTarget?: HTMLElement;
   maskPadding?: number;
   tooltipRef?: React.RefObject<HTMLElement | undefined>;
+  /** When tooltip coords change, tips must re-resolve against the new chrome box. */
+  tooltipPosition?: OrientationCoords;
+  identifier?: string;
   disableTips?: boolean;
 };
 
@@ -65,6 +79,19 @@ function placementsEqual(a: PlacedTip[], b: PlacedTip[]): boolean {
   return true;
 }
 
+/** Resolve the live tooltip box — ref first, then DOM id fallback. */
+function measureTooltip(
+  tooltipRef: React.RefObject<HTMLElement | undefined> | undefined,
+  identifier?: string,
+): TipRect | null {
+  const fromRef = tooltipObstacle(tooltipRef?.current, TOOLTIP_OBSTACLE_PAD);
+  if (fromRef) return fromRef;
+
+  const id = getIdString(baseTooltipContainerString, identifier);
+  const el = document.getElementById(id);
+  return tooltipObstacle(el, TOOLTIP_OBSTACLE_PAD);
+}
+
 export function TipLayer({
   steps,
   currentStepIndex,
@@ -74,6 +101,8 @@ export function TipLayer({
   activeTarget,
   maskPadding = 0,
   tooltipRef,
+  tooltipPosition,
+  identifier,
   disableTips = false,
 }: TipLayerProps) {
   const [placed, setPlaced] = useState<PlacedTip[]>([]);
@@ -86,7 +115,13 @@ export function TipLayer({
     }
 
     const spotlight = spotlightObstacle(activeTarget, maskPadding);
-    const tooltip = tooltipObstacle(tooltipRef?.current, 12);
+    // Prefer live DOM measure; when the shell exists but is still 0×0 (opening),
+    // skip tips entirely so we never place against a missing obstacle.
+    const tooltip = measureTooltip(tooltipRef, identifier);
+    if (tooltipPosition && !tooltip) {
+      setPlaced((prev) => (prev.length ? [] : prev));
+      return;
+    }
 
     type Candidate = {
       index: number;
@@ -108,7 +143,12 @@ export function TipLayer({
 
       const domRect = target.getBoundingClientRect();
       const targetRect = toTipRect(domRect);
+
+      // Target sits in the spotlight hole — tip would read as “inside” the focus.
       if (spotlight && isMostlyInside(targetRect, spotlight, 0.45)) continue;
+
+      // Target itself is under / kissing the tooltip chrome — skip (no good side).
+      if (tooltip && rectsOverlap(targetRect, tooltip, TIP_CLEARANCE)) continue;
 
       candidates.push({
         index,
@@ -143,9 +183,12 @@ export function TipLayer({
       const prefs =
         resolveOrientationPreferences(c.step.tipOrientationPreferences, direction) || defaultPrefs;
 
+      const obstacles = [...hardObstacles, ...siblingObstacles, ...placedMarkerObstacles];
+
       const result = placeTipMarker(c.target, {
         preferences: prefs,
-        obstacles: [...hardObstacles, ...siblingObstacles, ...placedMarkerObstacles],
+        obstacles,
+        clearance: TIP_CLEARANCE,
         targetRect: {
           left: c.targetRect.left,
           top: c.targetRect.top,
@@ -157,8 +200,14 @@ export function TipLayer({
       });
 
       if (!result) continue;
+
+      // Final gate: never ship a tip that still intersects the tooltip box.
+      const tipBox = tipMarkerRect(result.x, result.y, TIP_SIZE);
+      if (tooltip && rectsOverlap(tipBox, tooltip, TIP_CLEARANCE)) continue;
+      if (spotlight && rectsOverlap(tipBox, spotlight, TIP_CLEARANCE)) continue;
+
       next.push({ index: c.index, x: result.x, y: result.y });
-      placedMarkerObstacles.push(tipMarkerRect(result.x, result.y, TIP_SIZE));
+      placedMarkerObstacles.push(tipBox);
     }
 
     setPlaced((prev) => (placementsEqual(prev, next) ? prev : next));
@@ -171,27 +220,50 @@ export function TipLayer({
     activeTarget,
     maskPadding,
     tooltipRef,
+    identifier,
     defaultPrefs,
+    tooltipPosition,
+    tooltipPosition?.coords?.x,
+    tooltipPosition?.coords?.y,
+    tooltipPosition?.orientation,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (disableTips) {
       setPlaced([]);
       return;
     }
 
-    const { schedule, cancel } = createFrameScheduler(recompute);
     recompute();
 
+    const { schedule, cancel } = createFrameScheduler(recompute);
     window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('scroll', schedule, { capture: true, passive: true });
+
+    const shell = tooltipRef?.current ?? document.getElementById(getIdString(baseTooltipContainerString, identifier));
+    const onTransitionEnd = (e: Event) => {
+      const te = e as TransitionEvent;
+      if (te.target !== shell) return;
+      if (te.propertyName !== 'top' && te.propertyName !== 'left') return;
+      recompute();
+    };
+    shell?.addEventListener('transitionend', onTransitionEnd);
+
+    // Tooltip CSS transition (~160ms) — settle tips against the final chrome box.
+    const t1 = window.setTimeout(recompute, 50);
+    const t2 = window.setTimeout(recompute, 180);
+    const t3 = window.setTimeout(recompute, 320);
 
     return () => {
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule, true);
+      shell?.removeEventListener('transitionend', onTransitionEnd);
       cancel();
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
     };
-  }, [recompute, disableTips]);
+  }, [recompute, disableTips, tooltipRef, identifier]);
 
   if (disableTips || placed.length === 0) return null;
 

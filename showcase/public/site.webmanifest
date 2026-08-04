@@ -1,0 +1,24 @@
+{
+  "name": "tourara",
+  "short_name": "tourara",
+  "description": "React product tour toolkit — spotlight masks, tips, RTL, custom UI slots.",
+  "start_url": "/tourara/",
+  "scope": "/tourara/",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#3b82f6",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/tourara/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/tourara/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://persianstudio.github.io/tourara/sitemap.xml
+
+# Tourara demo & docs site — Persian Studio
+Host: https://persianstudio.github.io

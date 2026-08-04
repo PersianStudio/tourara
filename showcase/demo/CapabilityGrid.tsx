@@ -39,9 +39,9 @@ const CAPABILITIES = [
 
 export function CapabilityGrid() {
   return (
-    <section className="section">
+    <section className="section" id="capabilities" aria-labelledby="capabilities-heading">
       <div className="section-head">
-        <h2>Capability map</h2>
+        <h2 id="capabilities-heading">Capability map</h2>
         <p>Everything the main tour walks through — also useful as a checklist when integrating.</p>
       </div>
       <div className="capability-grid">

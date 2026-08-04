@@ -20,3 +20,4 @@ First public release.
 
 - English + Persian READMEs
 - `docs/` — architecture, API map, contributing, publishing
+- npm tarball is library-only (`dist/` + license/READMEs); showcase/docs/src never ship to consumers

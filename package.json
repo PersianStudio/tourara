@@ -1,7 +1,7 @@
 {
   "name": "@persianstudio/tourara",
   "version": "0.1.0",
-  "description": "Product tour toolkit for React — mask, tooltip, tips, and smart positioning. Zero UI-library peers.",
+  "description": "React product tour & onboarding library — SVG spotlight mask, smart tooltips, tip markers, RTL/LTR, custom UI slots. MIT. React-only peers (no MUI).",
   "license": "MIT",
   "author": "Persian Studio",
   "repository": {
@@ -14,20 +14,39 @@
   },
   "keywords": [
     "react",
-    "tour",
-    "onboarding",
-    "walkthrough",
-    "tooltip",
+    "react-tour",
     "product-tour",
+    "onboarding",
+    "user-onboarding",
+    "walkthrough",
+    "guided-tour",
+    "feature-tour",
     "spotlight",
-    "rtl"
+    "spotlight-tour",
+    "mask",
+    "tooltip",
+    "tip-markers",
+    "rtl",
+    "ltr",
+    "i18n",
+    "intro.js",
+    "shepherd",
+    "reactour",
+    "driver.js",
+    "joyride",
+    "typescript",
+    "persian-studio",
+    "tourara"
   ],
   "type": "module",
   "sideEffects": [
     "**/*.css"
   ],
   "files": [
-    "dist",
+    "dist/index.js",
+    "dist/index.cjs",
+    "dist/index.d.ts",
+    "dist/tourara.css",
     "LICENSE",
     "README.md",
     "README.fa.md",
@@ -58,8 +77,8 @@
     "build:showcase": "vite build --config vite.showcase.config.ts",
     "preview": "vite preview --config vite.showcase.config.ts",
     "prepack": "pnpm typecheck && pnpm build",
-    "pack:check": "npm pack --dry-run",
-    "prepublishOnly": "pnpm typecheck && pnpm build"
+    "pack:check": "node scripts/assert-npm-pack.mjs",
+    "prepublishOnly": "pnpm typecheck && pnpm build && pnpm pack:check"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

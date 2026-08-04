@@ -26,6 +26,23 @@ pnpm pack:check     # dry-run npm tarball
 6. **Zero UI peers** — library chrome is HTML/CSS + CSS variables; MUI stays in `showcase/` only.
 7. **Context for host mode** — `TourProvider` / `useTourContext` (no Zustand).
 8. **Match existing patterns** — fixed portal viewport coords, geometry-first pointer, rAF-throttled tips.
+9. **Library ≠ showcase** — `src/` never imports from `showcase/`. npm ships only `dist/` (+ license/READMEs); see [PUBLISHING.md](./PUBLISHING.md).
+
+## Repo layout
+
+| Path | Role |
+|------|------|
+| `src/` | Publishable library source (built to `dist/`) |
+| `dist/` | Build output — what npm installs (gitignored) |
+| `showcase/` | Demo app only (Pages / `pnpm dev`) — **not** in the npm tarball |
+| `docs/` | Maintainer docs — **not** in the npm tarball |
+| `scripts/` | Release helpers (e.g. `assert-npm-pack.mjs`) |
+
+```bash
+pnpm build          # library → dist/   (what consumers get)
+pnpm build:showcase # demo → showcase-dist/  (GitHub Pages only)
+pnpm pack:check     # assert tarball has no showcase/src/docs/maps
+```
 
 ## Where to change what
 

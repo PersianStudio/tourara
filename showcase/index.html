@@ -3,15 +3,152 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tourara — React product tours</title>
+
+    <!-- Primary SEO -->
+    <title>tourara — React Product Tour Library | Spotlight Mask, Tips, RTL</title>
+    <meta
+      name="description"
+      content="Open-source React product tour toolkit: SVG spotlight masks, smart tooltip placement, tip markers, RTL/LTR, keyboard nav, and custom UI slots. Zero UI peers — React only. MIT by Persian Studio."
+    />
+    <meta
+      name="keywords"
+      content="react tour, react product tour, onboarding tour, walkthrough, spotlight mask, guided tour, react tooltip tour, RTL tour, intro.js alternative, shepherd.js alternative, reactour alternative, driver.js alternative, user onboarding, feature tour, Persian Studio, tourara"
+    />
+    <meta name="author" content="Persian Studio" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#070b14" />
+    <meta name="color-scheme" content="dark light" />
+
+    <link rel="canonical" href="https://persianstudio.github.io/tourara/" />
+    <link rel="alternate" hreflang="en" href="https://persianstudio.github.io/tourara/" />
+    <link
+      rel="alternate"
+      hreflang="fa"
+      href="https://github.com/PersianStudio/tourara/blob/main/README.fa.md"
+    />
+    <link rel="alternate" hreflang="x-default" href="https://persianstudio.github.io/tourara/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="tourara" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://persianstudio.github.io/tourara/" />
+    <meta property="og:title" content="tourara — React product tours with full UI control" />
+    <meta
+      property="og:description"
+      content="Build onboarding & feature walkthroughs in React: SVG masks, smart placement, tip markers, RTL, slots. MIT · React-only peers."
+    />
+    <meta property="og:image" content="https://persianstudio.github.io/tourara/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="tourara — React product tour toolkit by Persian Studio" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="tourara — React product tours with full UI control" />
+    <meta
+      name="twitter:description"
+      content="Open-source React tour engine: spotlight mask, tips, RTL, custom slots. Zero UI-library peers."
+    />
+    <meta name="twitter:image" content="https://persianstudio.github.io/tourara/og-image.jpg" />
+    <meta name="twitter:image:alt" content="tourara React product tour demo" />
+
+    <!-- Icons & PWA-ish -->
+    <link rel="icon" href="/tourara/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/tourara/apple-touch-icon.png" />
+    <link rel="manifest" href="/tourara/site.webmanifest" />
+
+    <!-- Performance: fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://github.com" />
+    <link rel="dns-prefetch" href="https://www.npmjs.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://persianstudio.github.io/tourara/#website",
+            "url": "https://persianstudio.github.io/tourara/",
+            "name": "tourara",
+            "description": "React product tour toolkit with spotlight masks, tip markers, RTL support, and custom UI slots.",
+            "publisher": { "@id": "https://github.com/PersianStudio#organization" },
+            "inLanguage": "en"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://persianstudio.github.io/tourara/#app",
+            "name": "tourara",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Any",
+            "url": "https://persianstudio.github.io/tourara/",
+            "downloadUrl": "https://www.npmjs.com/package/@persianstudio/tourara",
+            "codeRepository": "https://github.com/PersianStudio/tourara",
+            "description": "Open-source React library for product tours and user onboarding: SVG spotlight, smart tooltip placement, tips, keyboard navigation, RTL/LTR.",
+            "license": "https://opensource.org/licenses/MIT",
+            "softwareVersion": "0.1.0",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "author": { "@id": "https://github.com/PersianStudio#organization" },
+            "keywords": "react tour, onboarding, walkthrough, spotlight, RTL, product tour"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://github.com/PersianStudio#organization",
+            "name": "Persian Studio",
+            "url": "https://github.com/PersianStudio",
+            "sameAs": ["https://github.com/PersianStudio"]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Persian Studio",
+                "item": "https://github.com/PersianStudio"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "tourara",
+                "item": "https://persianstudio.github.io/tourara/"
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <noscript>
+      <main style="max-width: 40rem; margin: 2rem auto; font-family: system-ui; padding: 1rem">
+        <h1>tourara — React product tour library</h1>
+        <p>
+          Open-source toolkit for React onboarding and feature walkthroughs (SVG spotlight mask, tip markers, RTL).
+          Enable JavaScript to run the interactive demo, or install from npm:
+        </p>
+        <p><code>pnpm add @persianstudio/tourara</code></p>
+        <p>
+          <a href="https://github.com/PersianStudio/tourara">GitHub</a> ·
+          <a href="https://www.npmjs.com/package/@persianstudio/tourara">npm</a> ·
+          <a href="https://github.com/PersianStudio/tourara/blob/main/README.md">Docs</a>
+        </p>
+      </main>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/main.tsx"></script>
   </body>

@@ -46,6 +46,8 @@
 pnpm add @persianstudio/tourara
 ```
 
+پکیج npm فقط کتابخانهٔ کامپایل‌شده (`dist/`) را شامل می‌شود — نه showcase، نه `src/`، نه `docs/`. دمو روی [GitHub Pages](https://persianstudio.github.io/tourara/) است.
+
 ---
 
 ## شروع سریع (LTR — پیش‌فرض)

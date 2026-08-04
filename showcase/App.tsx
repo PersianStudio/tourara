@@ -83,38 +83,47 @@ export function App() {
 
       <Hero tourRunning={tourRunning} onStartMainTour={startMainTour} mode={mode} onToggleMode={toggleMode} />
 
-      <WhyBuilt />
+      <main id="main">
+        <WhyBuilt />
 
-      <DemoApp onStartTour={startMainTour} tourRunning={tourRunning} />
+        <DemoApp onStartTour={startMainTour} tourRunning={tourRunning} />
 
-      <RtlDemo
-        direction={demoDirection}
-        onDirectionChange={setDemoDirection}
-        onStartRtlTour={startRtlTour}
-      />
+        <RtlDemo
+          direction={demoDirection}
+          onDirectionChange={setDemoDirection}
+          onStartRtlTour={startRtlTour}
+        />
 
-      <CapabilityGrid />
+        <CapabilityGrid />
 
-      <SetupGuide onStartSetupTour={startSetupTour} />
+        <SetupGuide onStartSetupTour={startSetupTour} />
 
-      <CustomUIShowcase />
-      <div style={{ marginTop: '0.75rem' }}>
-        <button type="button" className="btn btn-yellow btn-compact" onClick={startCustomUiTour}>
-          Tour custom UI
-        </button>
-      </div>
+        <CustomUIShowcase />
+        <div style={{ marginTop: '0.75rem' }}>
+          <button type="button" className="btn btn-yellow btn-compact" onClick={startCustomUiTour}>
+            Tour custom UI
+          </button>
+        </div>
 
-      <ControlledDemo />
+        <ControlledDemo />
 
-      <ScrollDeepSection />
+        <ScrollDeepSection />
+      </main>
 
-      <footer className="footer">
-        <span>Persian Studio · MIT</span>
-        <a href="#why">Why</a>
-        <a href="#rtl">RTL</a>
-        <a href="#setup">Setup</a>
-        <a href="https://github.com/PersianStudio/tourara/blob/main/README.fa.md">فارسی</a>
-        <a href="https://github.com/PersianStudio/tourara">GitHub</a>
+      <footer className="footer" role="contentinfo">
+        <span>Persian Studio · MIT · @persianstudio/tourara</span>
+        <a href="#why">Why tourara</a>
+        <a href="#rtl">RTL product tours</a>
+        <a href="#setup">Setup guide</a>
+        <a href="https://github.com/PersianStudio/tourara/blob/main/README.fa.md" hrefLang="fa">
+          فارسی
+        </a>
+        <a href="https://github.com/PersianStudio/tourara" rel="noopener noreferrer">
+          GitHub
+        </a>
+        <a href="https://www.npmjs.com/package/@persianstudio/tourara" rel="noopener noreferrer">
+          npm package
+        </a>
       </footer>
     </div>
   );

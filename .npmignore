@@ -1,0 +1,29 @@
+# Defense-in-depth for the npm tarball.
+# The package.json "files" whitelist is authoritative; this blocks anything
+# that might otherwise slip in (and strips sourcemaps from dist/).
+#
+# Consumers install the compiled library only — never showcase/, src/, or docs/.
+
+# Never ship demo / docs / sources
+showcase
+showcase-dist
+src
+docs
+scripts
+.github
+*.config.ts
+*.config.js
+tsconfig*.json
+.git*
+.vscode
+.cursor
+
+# Dev / build artifacts
+node_modules
+coverage
+*.tgz
+*.log
+.DS_Store
+
+# Sourcemaps (keep generating locally; omit from install size)
+**/*.map

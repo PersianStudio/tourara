@@ -123,6 +123,8 @@ export function TourPortal({
           activeTarget={target}
           maskPadding={maskPadding || 0}
           tooltipRef={tooltipRef}
+          tooltipPosition={tooltipPosition}
+          identifier={identifier}
         />
       )}
     </div>

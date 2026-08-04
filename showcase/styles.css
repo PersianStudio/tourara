@@ -23,6 +23,23 @@
   --code-fg: #d7e4ff;
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100000;
+  padding: 0.75rem 1rem;
+  background: var(--blue);
+  color: #0b1220;
+  font-weight: 700;
+  border-radius: 0 0 8px 0;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
 [data-theme='light'] {
   --bg: #f4f7fc;
   --bg-2: #e8eef8;
@@ -171,6 +188,17 @@ body {
   line-height: 0.95;
   letter-spacing: -0.04em;
   font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.brand-sub {
+  font-size: clamp(0.95rem, 2.8vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--muted);
+  line-height: 1.2;
 }
 
 .hero-lead {

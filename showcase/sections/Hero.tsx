@@ -1,5 +1,5 @@
 /**
- * First-viewport hero for the showcase — brand, lead, and primary CTAs.
+ * First-viewport hero — brand-first with SEO-friendly supporting copy.
  */
 export type HeroProps = {
   tourRunning: boolean;
@@ -10,16 +10,20 @@ export type HeroProps = {
 
 export function Hero({ tourRunning, onStartMainTour, mode, onToggleMode }: HeroProps) {
   return (
-    <header className="hero">
+    <header className="hero" role="banner">
       <div className="hero-visual">
         <div className="float-mark" aria-hidden data-tour="hero-mark" />
         <div className="hero-ring" aria-hidden />
       </div>
-      <p className="hero-kicker">Persian Studio · docs + playground</p>
-      <h1 className="brand">tourara</h1>
+      <p className="hero-kicker">Persian Studio · open-source React onboarding</p>
+      <h1 className="brand">
+        tourara
+        <span className="brand-sub">React product tours</span>
+      </h1>
       <p className="hero-lead">
-        Product tours for React — SVG masks, tip markers, auto-scroll, interactive steps, RTL/LTR, and render slots.
-        Defaults stay English and LTR.
+        Build product tours and user walkthroughs in React — SVG spotlight masks, tip markers, smart
+        tooltip placement, RTL/LTR, keyboard navigation, and custom UI slots. MIT licensed. Peers:
+        React only.
       </p>
       <div className="hero-actions">
         <button type="button" className="btn btn-primary" data-tour="start-tour" onClick={onStartMainTour}>
@@ -37,15 +41,22 @@ export function Hero({ tourRunning, onStartMainTour, mode, onToggleMode }: HeroP
         <a className="btn btn-ghost" href="#setup">
           Setup guide
         </a>
-        <a className="btn btn-ghost" href="https://github.com/PersianStudio/tourara">
+        <a className="btn btn-ghost" href="https://github.com/PersianStudio/tourara" rel="noopener noreferrer">
           GitHub
+        </a>
+        <a
+          className="btn btn-ghost"
+          href="https://www.npmjs.com/package/@persianstudio/tourara"
+          rel="noopener noreferrer"
+        >
+          npm
         </a>
       </div>
       <ul className="hero-meta">
-        <li>ltr default</li>
+        <li>react tour</li>
         <li>rtl ready</li>
-        <li>auto-scroll</li>
-        <li>slots</li>
+        <li>spotlight mask</li>
+        <li>zero ui peers</li>
       </ul>
     </header>
   );

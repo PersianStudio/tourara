@@ -1,13 +1,21 @@
 # tourara
 
-**React product-tour toolkit** — SVG spotlight masks, smart tooltip placement, inactive tip markers, keyboard navigation, and a Context-backed host for multi-page apps. Peers: **React only** (no MUI, no Zustand).
+[![npm](https://img.shields.io/npm/v/@persianstudio/tourara?color=3b82f6&label=npm)](https://www.npmjs.com/package/@persianstudio/tourara)
+[![license](https://img.shields.io/badge/license-MIT-0b1220?labelColor=101826)](./LICENSE)
+[![demo](https://img.shields.io/badge/demo-GitHub%20Pages-1d4ed8)](https://persianstudio.github.io/tourara/)
+[![react](https://img.shields.io/badge/peers-React%2018%2F19-61dafb?labelColor=0b1220)](https://react.dev/)
+[![bundle](https://img.shields.io/badge/deps-zero%20runtime-22c55e?labelColor=0b1220)](./package.json)
+
+**React product-tour & onboarding toolkit** — SVG spotlight masks, smart tooltip placement, tip markers, keyboard navigation, RTL/LTR, and render slots. Context-backed host for multi-page apps. Peers: **React only** (no MUI, no Zustand).
+
+> Looking for an **Intro.js / Shepherd / Reactour / Driver.js**-style walkthrough with full UI ownership? Tourara is built for that.
 
 **Languages:** English (default) · [فارسی (README.fa.md)](./README.fa.md)
 
 | | |
 |---|---|
-| **Package** | [`@persianstudio/tourara`](https://www.npmjs.com/package/@persianstudio/tourara) *(npm publish coming soon)* |
-| **Demo** | [persianstudio.github.io/tourara](https://persianstudio.github.io/tourara/) |
+| **Package** | [`@persianstudio/tourara`](https://www.npmjs.com/package/@persianstudio/tourara) |
+| **Live demo** | [persianstudio.github.io/tourara](https://persianstudio.github.io/tourara/) |
 | **Repo** | [github.com/PersianStudio/tourara](https://github.com/PersianStudio/tourara) |
 | **License** | MIT |
 
@@ -31,6 +39,7 @@ After searching the ecosystem, we could not find a tour component that satisfied
 
 - **Spotlight mask** — full-viewport SVG overlay with a rounded cutout around the target
 - **Smart placement** — 13 cardinal / diagonal orientations; prefers in-view candidates
+- **Precise caret** — tooltip pointer aims at the focus border (`corner: 'small' | 'none'`)
 - **RTL & LTR** — `direction: 'ltr' | 'rtl'` (default **`ltr`**); east/west preferences mirror in RTL; chrome uses `dir`
 - **Tip markers** — small indicators on other visible steps (capped, rAF-throttled; opt out with `disableTips`)
 - **Context or controlled** — wrap `<TourProvider>` + `<TourHost />` + `useTour`, or drive `<Tour />` yourself
@@ -40,6 +49,12 @@ After searching the ecosystem, we could not find a tour component that satisfied
 - **No router lock-in** — optional `resetKey` instead of a hard `react-router` dependency
 
 Default **copy is English**. Pass your own `finishBtnText` / `skipBtnText` / labels for other locales (see Persian demo on the showcase).
+
+### Who is this for?
+
+- Product teams shipping **feature onboarding** and **first-run tours**
+- Apps that need **RTL** (Persian, Arabic, Hebrew) without fighting LTR-only libraries
+- Design systems that refuse locked-in tour chrome (bring your own tooltip / mask)
 
 ---
 
@@ -57,15 +72,16 @@ No other runtime dependencies. Default styles inject automatically; optional ove
 
 ```bash
 pnpm add @persianstudio/tourara
-# or: npm / yarn
+# or: npm install / yarn add @persianstudio/tourara
 ```
 
-Until the package is on npm:
+The npm package ships **only the compiled library** (`dist/` JS + types + CSS) plus license/READMEs — **not** the showcase demo, docs sources, or TypeScript sources. Install size stays small; the [live demo](https://persianstudio.github.io/tourara/) is hosted on GitHub Pages. Clone this repo only when contributing.
+
+Until the package is on npm (temporary):
 
 ```bash
+# Still packs library-only files (no showcase) via package.json "files"
 pnpm add github:PersianStudio/tourara
-# or link a local clone
-pnpm link --global   # inside tourara after pnpm build
 ```
 
 Theme the default chrome with CSS variables (`--tourara-accent`, `--tourara-bg`, …) or replace it entirely with slots.
@@ -503,6 +519,7 @@ Contributor-oriented docs live under [`docs/`](./docs/):
 | [docs/API.md](./docs/API.md) | Export map & option groups |
 | [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Setup, principles, PR checklist |
 | [docs/PUBLISHING.md](./docs/PUBLISHING.md) | npm release checklist & troubleshooting |
+| [docs/SEO.md](./docs/SEO.md) | Search / npm / GitHub discoverability |
 
 ---
 

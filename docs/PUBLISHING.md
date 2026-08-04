@@ -9,17 +9,25 @@ Guide for releasing `@persianstudio/tourara` to the public npm registry.
 - Clean `main` (or release branch) with docs/showcase in sync
 - Node 18+ / pnpm 9
 
-## What gets published
+## What gets published (library only)
 
-From `package.json` → `files`:
+Consumers who `pnpm add @persianstudio/tourara` must **never** receive the showcase, docs tree, or TypeScript sources.
+
+Authoritative allowlist — `package.json` → `files`:
 
 | Path | Why |
 |------|-----|
-| `dist/` | ES + CJS bundles, rolled-up `index.d.ts`, `tourara.css` |
+| `dist/index.js` | ESM bundle |
+| `dist/index.cjs` | CJS bundle |
+| `dist/index.d.ts` | Rolled-up types |
+| `dist/tourara.css` | Optional stylesheet entry (`@persianstudio/tourara/styles.css`) |
 | `LICENSE` | MIT |
 | `README.md` / `README.fa.md` | npm package page |
+| `CHANGELOG.md` | Release notes |
 
-**Not** published: `src/`, `showcase/`, `docs/`, `node_modules/`, lockfile (npm uses `files` + `.gitignore` rules).
+**Explicitly excluded** (also listed in `.npmignore`): `src/`, `showcase/`, `showcase-dist/`, `docs/`, `scripts/`, sourcemaps (`*.map`), configs, lockfiles.
+
+`pnpm pack:check` (`scripts/assert-npm-pack.mjs`) fails the release if anything else lands in the tarball. `prepublishOnly` runs it automatically.
 
 Peers only:
 
@@ -34,6 +42,17 @@ No runtime dependencies. Default chrome CSS injects at runtime; optional:
 import '@persianstudio/tourara/styles.css';
 ```
 
+## Repo layout vs install
+
+| Path | In git clone | In npm install |
+|------|--------------|----------------|
+| `src/` | yes (library source) | **no** |
+| `dist/` | build artifact (gitignored) | **yes** (built on publish) |
+| `showcase/` | yes (demo app; MUI allowed here only) | **no** |
+| `docs/` | yes | **no** |
+
+Showcase aliases `@persianstudio/tourara` → `src/` for local development (`vite.showcase.config.ts`). The library never imports from `showcase/`.
+
 ## Pre-flight checklist
 
 ```bash
@@ -41,7 +60,7 @@ pnpm install
 pnpm typecheck
 pnpm build
 pnpm build:showcase
-pnpm pack:check          # lists tarball contents — confirm no src/secrets
+pnpm pack:check          # must print library-only file list
 ```
 
 Manual checks:
@@ -51,12 +70,13 @@ Manual checks:
 - [ ] Showcase runs (`pnpm dev`) and main tour / RTL / controlled demos work
 - [ ] Version in `package.json` bumped appropriately (semver)
 - [ ] `CHANGELOG.md` updated (if you maintain one)
+- [ ] `pack:check` shows no `showcase/`, `src/`, or `*.map`
 
 ## Version bumps
 
 | Change | Bump |
 |--------|------|
-| Bugfix, docs, perf (compatible) | `0.1.x` patch |
+| Bug fix, docs, perf (compatible) | `0.1.x` patch |
 | New options / exports (compatible) | `0.x.0` minor |
 | Breaking API / peer changes | `1.0.0` (or major) |
 
@@ -67,7 +87,7 @@ pnpm version patch   # or minor / major — updates package.json + git tag
 
 ## Publish
 
-`prepublishOnly` / `prepack` already run typecheck + build.
+`prepublishOnly` / `prepack` already run typecheck + build; `prepublishOnly` also runs `pack:check`.
 
 ```bash
 # First public release under the org scope
@@ -80,9 +100,9 @@ pnpm publish
 Dry-run without uploading:
 
 ```bash
-npm publish --dry-run
-# or
 pnpm pack:check
+# or
+npm publish --dry-run
 ```
 
 ## After publish
@@ -98,15 +118,16 @@ pnpm add @persianstudio/tourara
 import { TourProvider, TourHost, useTourContext } from '@persianstudio/tourara';
 ```
 
-3. Tag the release on GitHub (if not done by `pnpm version`)
-4. Optionally announce / update the Pages demo if showcase changed
+3. Confirm `node_modules/@persianstudio/tourara` contains only `dist/` + READMEs (no `showcase/`)
+4. Tag the release on GitHub (if not done by `pnpm version`)
+5. Optionally announce / update the Pages demo if showcase changed
 
 ## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
 | `402 Payment Required` / forbidden scope | Ensure org membership + 2FA; use `--access public` for scoped packages |
-| Wrong files in tarball | Check `files` + that `pnpm build` left a clean `dist/` (no `src/` tree) |
+| Wrong files in tarball | Check `files` + `.npmignore`; run `pnpm pack:check` |
 | Types resolve to missing paths | Build must use vite-plugin-dts `rollupTypes` (single `dist/index.d.ts`) — do not re-run loose `tsc` emit into `dist/` |
 | Consumers miss styles | Styles inject via `TourProvider` / `Tour`; or `import '@persianstudio/tourara/styles.css'` |
 
