@@ -245,19 +245,28 @@ export const useUpdateTour = ({
 
   // React Effect: Trigger updates when the tour changes
   React.useEffect(() => {
-    let stopUltraFastUpdates: any;
+    let stopUltraFastUpdates: (() => void) | undefined;
+    let raf = 0;
 
-    if (tooltip.current && tourOpen) {
-      tooltip.current.focus();
-      stopUltraFastUpdates = startUltraFastUpdates(1500, 5); // 2 seconds or stable for 5 checks
-    } else {
+    if (!tourOpen || !tourRoot) {
       cleanup();
+      return;
     }
 
+    // Ref is assigned after commit — wait one frame so tooltip.current exists.
+    raf = requestAnimationFrame(() => {
+      if (tooltip.current) {
+        tooltip.current.focus({ preventScroll: true });
+        stopUltraFastUpdates = startUltraFastUpdates(1500, 5);
+      }
+    });
+
     return () => {
+      cancelAnimationFrame(raf);
       if (stopUltraFastUpdates) stopUltraFastUpdates();
     };
-  }, [currentStepIndex, currentStepContent, tourOpen, tourRoot, tooltip.current, target, tooltipSeparation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStepIndex, currentStepContent, tourOpen, tourRoot, tooltipSeparation]);
 
   return { updateTour };
 };

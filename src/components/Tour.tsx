@@ -188,16 +188,31 @@ export const Tour = (props: TourProps) => {
   };
 
   React.useEffect(() => {
+    if (!tourOpen) {
+      setTourRoot(undefined);
+      return;
+    }
+
     let root = rootSelector ? document.querySelector(rootSelector) : undefined;
 
     if (!root) {
-      root = getNearestScrollAncestor(portal.current);
+      root = getNearestScrollAncestor(portal.current) || document.body;
     }
 
-    if (tourOpen !== false && root !== tourRoot) {
+    if (root && root !== tourRoot) {
       setTourRoot(root as Element);
     }
-  }, [rootSelector, portal.current, tourOpen]);
+  }, [rootSelector, tourOpen]);
+
+  // Ensure tourRoot resolves on the first open frame even before portal ref exists.
+  React.useLayoutEffect(() => {
+    if (!tourOpen || tourRoot) return;
+    const root =
+      (rootSelector ? document.querySelector(rootSelector) : null) ||
+      getNearestScrollAncestor(portal.current) ||
+      document.body;
+    setTourRoot(root as Element);
+  }, [tourOpen, tourRoot, rootSelector]);
 
   React.useEffect(() => {
     if (tourOpen) {
@@ -292,11 +307,12 @@ export const Tour = (props: TourProps) => {
 
   const tooltipContainerStyle: SxProps<Theme> = {
     position: 'absolute',
-    top: tooltipPosition?.coords.y,
-    left: tooltipPosition?.coords.x,
+    top: tooltipPosition?.coords.y ?? 24,
+    left: tooltipPosition?.coords.x ?? 24,
     transition: transition,
     zIndex: 10000,
     pointerEvents: 'auto',
+    outline: 'none',
     ...(!customTooltipRenderer && {
       maxWidth: tooltipMaxWidth || { xs: 300, sm: 430, md: 480, lg: 530, xl: 580 },
       width: '100%',
@@ -308,11 +324,15 @@ export const Tour = (props: TourProps) => {
     ...tooltipContainerSx,
   };
 
+  // Must cover the viewport explicitly. Absolute tooltip children do not expand
+  // this box; when `disableMask` is true there is no SVG either — without size +
+  // overflow:hidden the tooltip is clipped to 0×0 and appears to "do nothing".
   const portalStyle: SxProps<Theme> = {
     position: 'fixed',
     overflow: 'hidden',
-    top: 0,
-    left: 0,
+    inset: 0,
+    width: '100vw',
+    height: '100vh',
     zIndex: zIndex,
     visibility: 'visible',
     pointerEvents: 'none',
@@ -340,6 +360,7 @@ export const Tour = (props: TourProps) => {
           id={getIdString(baseTooltipContainerString, identifier)}
           sx={tooltipContainerStyle}
           onKeyDown={keyPressHandler}
+          tabIndex={0}
         >
           {customTooltipRenderer ? customTooltipRenderer(tourLogic) : <Tooltip {...tourLogic} tooltipRef={tooltip} />}
         </Box>
