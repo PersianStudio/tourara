@@ -3,8 +3,8 @@
  *
  * Aims the caret tip at the nearest point on the padded focus rect
  * (target + maskPadding — the same hole the mask stroke follows).
- * Uses edge carets for cardinal relationships and corner carets when
- * the focus sits diagonally from the tooltip.
+ * Corner carets stay card-local (fixed length) so they never stretch
+ * across the gutter or detach while the shell animates.
  */
 
 import { CardinalOrientation } from '../../utils/positioning';
@@ -23,10 +23,8 @@ export type PointerPlacement = {
   side: PointerSide;
   /** Distance along the side from its start edge to the caret’s near corner. Unused for corners. */
   offset: number;
-  /** Tip length (edge: separation; corner: distance to focus border). */
+  /** Tip length — always ~tooltipSeparation for both edges and corners. */
   size: number;
-  /** Half-width of the triangle base. Defaults to `size` for edge carets. */
-  base?: number;
   aimX: number;
   aimY: number;
   /**
@@ -42,6 +40,12 @@ export type PlaceTooltipPointerArgs = {
   maskPadding?: number;
   arrowSize?: number;
   orientation?: CardinalOrientation | null;
+  /**
+   * Optional intended shell top-left (viewport coords). When set, placement
+   * uses this box instead of a mid-transition getBoundingClientRect so the
+   * caret stays locked to the card while CSS animates top/left.
+   */
+  intendedCoords?: { x: number; y: number } | null;
 };
 
 type Rect = { left: number; top: number; right: number; bottom: number; width: number; height: number };
@@ -163,13 +167,27 @@ export function placeTooltipPointer(args: PlaceTooltipPointerArgs): PointerPlace
     maskPadding = 0,
     arrowSize = 10,
     orientation,
+    intendedCoords,
   } = args;
 
-  const tooltip = toRect(tooltipEl.getBoundingClientRect());
+  const live = toRect(tooltipEl.getBoundingClientRect());
+  if (live.width <= 0 || live.height <= 0) return null;
+
+  // Prefer the destination box while the shell CSS-transitions top/left.
+  const tooltip: Rect =
+    intendedCoords && Number.isFinite(intendedCoords.x) && Number.isFinite(intendedCoords.y)
+      ? {
+          left: intendedCoords.x,
+          top: intendedCoords.y,
+          width: live.width,
+          height: live.height,
+          right: intendedCoords.x + live.width,
+          bottom: intendedCoords.y + live.height,
+        }
+      : live;
+
   const target = toRect(targetEl.getBoundingClientRect());
-  if (tooltip.width <= 0 || tooltip.height <= 0 || target.width <= 0 || target.height <= 0) {
-    return null;
-  }
+  if (target.width <= 0 || target.height <= 0) return null;
 
   const focus = inflate(target, Math.max(0, maskPadding));
   const cx = (tooltip.left + tooltip.right) / 2;
@@ -186,35 +204,28 @@ export function placeTooltipPointer(args: PlaceTooltipPointerArgs): PointerPlace
     Math.abs(aim.y - cy) / Math.max(tooltip.height, 1) < 0.15;
   const side = ambiguous && oriented ? oriented : geometric;
 
-  const baseWidth = arrowSize * 2;
-  const edgeInset = Math.min(12, Math.max(6, arrowSize));
+  const size = Math.max(6, arrowSize);
+  const baseWidth = size * 2;
+  const edgeInset = Math.min(12, Math.max(6, size));
 
   let offset = 0;
   let rotation: number | undefined;
-  let size = arrowSize;
-  let base: number | undefined;
 
   if (isCornerSide(side)) {
     const corner = cornerPoint(tooltip, side);
     rotation = rotationToward(corner.x, corner.y, aim.x, aim.y);
-    // Long skinny caret: tip meets the focus border, base stays arrow-sized.
-    // Cap length so a bad placement can't paint a viewport-long spike on mobile.
-    const gap = Math.hypot(aim.x - corner.x, aim.y - corner.y);
-    const maxReach = Math.max(arrowSize * 2.5, 36);
-    size = Math.max(6, Math.min(gap, maxReach));
-    base = arrowSize;
   } else if (side === 'top' || side === 'bottom') {
-    const raw = aim.x - tooltip.left - arrowSize;
+    const raw = aim.x - tooltip.left - size;
     const max = Math.max(edgeInset, tooltip.width - baseWidth - edgeInset);
     offset = Math.min(Math.max(raw, edgeInset), max);
   } else {
-    const raw = aim.y - tooltip.top - arrowSize;
+    const raw = aim.y - tooltip.top - size;
     const max = Math.max(edgeInset, tooltip.height - baseWidth - edgeInset);
     offset = Math.min(Math.max(raw, edgeInset), max);
   }
 
-  if (!Number.isFinite(offset) || !Number.isFinite(size)) return null;
+  if (!Number.isFinite(offset)) return null;
   if (rotation !== undefined && !Number.isFinite(rotation)) return null;
 
-  return { side, offset, size, base, aimX: aim.x, aimY: aim.y, rotation };
+  return { side, offset, size, aimX: aim.x, aimY: aim.y, rotation };
 }

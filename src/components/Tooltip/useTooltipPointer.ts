@@ -1,5 +1,7 @@
 /**
  * Keeps the tooltip caret locked onto the active focus border while the tour moves.
+ * Uses intended shell coords during CSS top/left transitions so the caret rides
+ * with the card instead of re-aiming from mid-animation getBoundingClientRect.
  */
 import * as React from 'react';
 import type { TourStep } from '../../types';
@@ -28,6 +30,7 @@ export function useTooltipPointer({
   tooltipSeparation = 10,
 }: UseTooltipPointerArgs): PointerPlacement | null {
   const [placement, setPlacement] = React.useState<PointerPlacement | null>(null);
+  const transitioning = React.useRef(false);
 
   const recompute = React.useCallback(() => {
     if (corner === 'none') {
@@ -48,15 +51,18 @@ export function useTooltipPointer({
       return;
     }
 
-    // Arrow length fills the separation gap so the tip meets the mask stroke.
+    // Arrow length matches the separation gap (same as edge carets).
     const arrowSize = Math.max(6, tooltipSeparation);
 
+    // Prefer destination shell coords so mid-transition getBoundingClientRect
+    // never stretches/detaches the caret from the moving card.
     const next = placeTooltipPointer({
       tooltipEl,
       targetEl,
       maskPadding,
       arrowSize,
       orientation: tooltipPosition?.orientation,
+      intendedCoords: tooltipPosition?.coords ?? null,
     });
 
     setPlacement((prev) => {
@@ -66,7 +72,6 @@ export function useTooltipPointer({
         prev.side === next.side &&
         Math.abs(prev.offset - next.offset) < 0.5 &&
         prev.size === next.size &&
-        (prev.base ?? prev.size) === (next.base ?? next.size) &&
         Math.abs((prev.rotation ?? 0) - (next.rotation ?? 0)) < 0.5
       ) {
         return prev;
@@ -81,6 +86,8 @@ export function useTooltipPointer({
     maskPadding,
     tooltipSeparation,
     tooltipPosition?.orientation,
+    tooltipPosition?.coords?.x,
+    tooltipPosition?.coords?.y,
   ]);
 
   React.useLayoutEffect(() => {
@@ -88,14 +95,38 @@ export function useTooltipPointer({
     const { schedule, cancel } = createFrameScheduler(recompute);
     window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('scroll', schedule, { capture: true, passive: true });
-    const t = window.setTimeout(recompute, 180);
+
+    const shell = cardRef.current?.closest('.tourara-tooltip-shell') as HTMLElement | null;
+    const onTransitionStart = (event: TransitionEvent) => {
+      if (event.target !== shell) return;
+      if (event.propertyName !== 'top' && event.propertyName !== 'left') return;
+      transitioning.current = true;
+    };
+    const onTransitionEnd = (event: TransitionEvent) => {
+      if (event.target !== shell) return;
+      if (event.propertyName !== 'top' && event.propertyName !== 'left') return;
+      transitioning.current = false;
+      recompute();
+    };
+
+    shell?.addEventListener('transitionstart', onTransitionStart);
+    shell?.addEventListener('transitionend', onTransitionEnd);
+
+    // Safety: transition may be disabled / interrupted.
+    const settle = window.setTimeout(() => {
+      transitioning.current = false;
+      recompute();
+    }, 220);
+
     return () => {
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule, true);
+      shell?.removeEventListener('transitionstart', onTransitionStart);
+      shell?.removeEventListener('transitionend', onTransitionEnd);
       cancel();
-      window.clearTimeout(t);
+      window.clearTimeout(settle);
     };
-  }, [recompute, tooltipPosition?.coords?.x, tooltipPosition?.coords?.y]);
+  }, [recompute, cardRef, tooltipPosition?.coords?.x, tooltipPosition?.coords?.y]);
 
   return placement;
 }

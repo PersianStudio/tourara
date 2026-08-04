@@ -1,7 +1,8 @@
 /**
  * Geometry-aligned caret that points from the tooltip at the focus border.
- * Edge carets use CSS border triangles; corner carets use the same triangle
- * rotated and translated so the tip lands on the aim point.
+ * Edge + corner carets share the same CSS border triangle. Corner carets rotate
+ * at the card corner and nudge outward by one caret length — never across the
+ * full gutter — so they stay attached while the shell transitions.
  */
 import type { CSSProperties } from 'react';
 import type { PointerPlacement, PointerSide } from './placeTooltipPointer';
@@ -30,27 +31,10 @@ function defaultCornerRotation(side: PointerSide): number {
   }
 }
 
-/** Pin the tip-up triangle’s tip origin to the card corner. */
-function cornerAnchor(side: PointerSide, overlap: number): CSSProperties {
-  switch (side) {
-    case 'top-right':
-      return { top: -overlap, right: 0 };
-    case 'top-left':
-      return { top: -overlap, left: 0 };
-    case 'bottom-right':
-      return { top: 'auto', bottom: -overlap, right: 0 };
-    case 'bottom-left':
-      return { top: 'auto', bottom: -overlap, left: 0 };
-    default:
-      return {};
-  }
-}
-
 function caretStyle(placement: PointerPlacement): CSSProperties {
-  const { side, offset, size, base, rotation } = placement;
+  const { side, offset, size, rotation } = placement;
   const color = 'var(--tourara-bg)';
   const transparent = 'transparent';
-  const halfBase = base ?? size;
 
   // 1px overlap removes the sub-pixel gap against the rounded card edge.
   const overlap = 1;
@@ -64,26 +48,36 @@ function caretStyle(placement: PointerPlacement): CSSProperties {
     boxSizing: 'border-box',
   };
 
-  // Tip-up triangle: length = size, base width = 2 * halfBase.
+  // Tip-up isosceles — same geometry as the edge “top” caret.
   const tipUp: CSSProperties = {
     ...common,
-    borderLeft: `${halfBase}px solid ${transparent}`,
-    borderRight: `${halfBase}px solid ${transparent}`,
+    borderLeft: `${size}px solid ${transparent}`,
+    borderRight: `${size}px solid ${transparent}`,
     borderBottom: `${size}px solid ${color}`,
   };
 
   if (isCornerSide(side)) {
     const deg = rotation ?? defaultCornerRotation(side);
-    // rotation = atan2(dy,dx)*180/PI + 90  →  aim angle = deg - 90
+    // Aim angle from tip-up rotation convention (rotation = aimDeg + 90).
     const aimRad = ((deg - 90) * Math.PI) / 180;
+    // Nudge tip one caret length outward — matches edge protrusion, stays
+    // card-local (size is tooltipSeparation, not distance-to-focus).
     const tx = Math.cos(aimRad) * size;
     const ty = Math.sin(aimRad) * size;
 
+    const anchor: CSSProperties =
+      side === 'top-right'
+        ? { top: 0, right: 0 }
+        : side === 'top-left'
+          ? { top: 0, left: 0 }
+          : side === 'bottom-right'
+            ? { top: 'auto', bottom: 0, right: 0 }
+            : { top: 'auto', bottom: 0, left: 0 };
+
     return {
       ...tipUp,
-      ...cornerAnchor(side, overlap),
-      // Rotate around the tip, then push the tip out to the focus border.
-      // CSS applies right-to-left: rotate first, then translate in screen space.
+      ...anchor,
+      // rotate around tip, then push tip outward along the aim vector
       transform: `translate(${tx}px, ${ty}px) rotate(${deg}deg)`,
       transformOrigin: '0 0',
     };
@@ -101,8 +95,8 @@ function caretStyle(placement: PointerPlacement): CSSProperties {
         ...common,
         bottom: -(size - overlap),
         left: offset,
-        borderLeft: `${halfBase}px solid ${transparent}`,
-        borderRight: `${halfBase}px solid ${transparent}`,
+        borderLeft: `${size}px solid ${transparent}`,
+        borderRight: `${size}px solid ${transparent}`,
         borderTop: `${size}px solid ${color}`,
       };
     case 'left':
@@ -110,8 +104,8 @@ function caretStyle(placement: PointerPlacement): CSSProperties {
         ...common,
         left: -(size - overlap),
         top: offset,
-        borderTop: `${halfBase}px solid ${transparent}`,
-        borderBottom: `${halfBase}px solid ${transparent}`,
+        borderTop: `${size}px solid ${transparent}`,
+        borderBottom: `${size}px solid ${transparent}`,
         borderRight: `${size}px solid ${color}`,
       };
     case 'right':
@@ -119,8 +113,8 @@ function caretStyle(placement: PointerPlacement): CSSProperties {
         ...common,
         right: -(size - overlap),
         top: offset,
-        borderTop: `${halfBase}px solid ${transparent}`,
-        borderBottom: `${halfBase}px solid ${transparent}`,
+        borderTop: `${size}px solid ${transparent}`,
+        borderBottom: `${size}px solid ${transparent}`,
         borderLeft: `${size}px solid ${color}`,
       };
     default:
