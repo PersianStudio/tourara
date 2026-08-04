@@ -1,8 +1,13 @@
+<p align="center">
+  <img src="./docs/public/logo.svg" alt="tourara" width="96" height="96" />
+</p>
+
 # tourara
 
 [![npm](https://img.shields.io/npm/v/@persianstudio/tourara?color=3b82f6&label=npm)](https://www.npmjs.com/package/@persianstudio/tourara)
 [![license](https://img.shields.io/badge/license-MIT-0b1220?labelColor=101826)](./LICENSE)
-[![demo](https://img.shields.io/badge/demo-GitHub%20Pages-1d4ed8)](https://persianstudio.github.io/tourara/)
+[![demo](https://img.shields.io/badge/demo-GitHub%20Pages-1d4ed8)](https://persianstudio.github.io/tourara/showcase/)
+[![docs](https://img.shields.io/badge/docs-read%20the%20docs-3b82f6)](https://persianstudio.github.io/tourara/docs/)
 [![react](https://img.shields.io/badge/peers-React%2018%2F19-61dafb?labelColor=0b1220)](https://react.dev/)
 [![bundle](https://img.shields.io/badge/deps-zero%20runtime-22c55e?labelColor=0b1220)](./package.json)
 
@@ -15,7 +20,7 @@
 | | |
 |---|---|
 | **Package** | [`@persianstudio/tourara`](https://www.npmjs.com/package/@persianstudio/tourara) |
-| **Live demo** | [persianstudio.github.io/tourara](https://persianstudio.github.io/tourara/) |
+| **Live demo** | [persianstudio.github.io/tourara/showcase](https://persianstudio.github.io/tourara/showcase/) |
 | **Docs** | [persianstudio.github.io/tourara/docs](https://persianstudio.github.io/tourara/docs/) |
 | **Repo** | [github.com/PersianStudio/tourara](https://github.com/PersianStudio/tourara) |
 | **License** | MIT |
@@ -76,7 +81,7 @@ pnpm add @persianstudio/tourara
 # or: npm install / yarn add @persianstudio/tourara
 ```
 
-The npm package ships **only the compiled library** (`dist/` JS + types + CSS) plus license/READMEs — **not** the showcase demo, docs sources, or TypeScript sources. Install size stays small; the [live demo](https://persianstudio.github.io/tourara/) is hosted on GitHub Pages. Clone this repo only when contributing.
+The npm package ships **only the compiled library** (`dist/` JS + types + CSS) plus license/READMEs — **not** the showcase demo, docs sources, or TypeScript sources. Install size stays small; the [live demo](https://persianstudio.github.io/tourara/showcase/) is hosted on GitHub Pages. Clone this repo only when contributing.
 
 Until the package is on npm (temporary):
 
@@ -486,10 +491,13 @@ Every push to `main` runs [`.github/workflows/pages.yml`](.github/workflows/page
 
 | URL | Content |
 |-----|---------|
-| https://persianstudio.github.io/tourara/ | Interactive showcase |
-| https://persianstudio.github.io/tourara/docs/ | Full documentation (VitePress) |
+| https://persianstudio.github.io/tourara/ | Redirects to docs |
+| https://persianstudio.github.io/tourara/docs/ | Documentation (primary entry) |
+| https://persianstudio.github.io/tourara/showcase/ | Interactive showcase |
 
 Enable once: repo **Settings → Pages → Source → GitHub Actions**.
+
+Set the GitHub repo **social preview** / avatar with repo-root `logo.png` under **Settings → General**. The same mark brands docs, showcase, and README.
 
 Details: **[docs/internals/github-pages.md](./docs/internals/github-pages.md)**.
 

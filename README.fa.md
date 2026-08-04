@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./docs/public/logo.svg" alt="tourara" width="96" height="96" />
+</p>
+
 # tourara
 
 **جعبه ابزار تور محصول برای React** — ماسک SVG، جایگذاری هوشمند تولتیپ، نشانگر tip، ناوبری صفحه‌کلید، و میزبان مبتنی بر Context برای اپ‌های چندصفحه‌ای. همتایان فقط React (بدون MUI و Zustand).
@@ -7,7 +11,8 @@
 | | |
 |---|---|
 | **پکیج** | [`@persianstudio/tourara`](https://www.npmjs.com/package/@persianstudio/tourara) *(به‌زودی روی npm)* |
-| **دمو** | [persianstudio.github.io/tourara](https://persianstudio.github.io/tourara/) |
+| **مستندات** | [persianstudio.github.io/tourara/docs](https://persianstudio.github.io/tourara/docs/) |
+| **دمو** | [persianstudio.github.io/tourara/showcase](https://persianstudio.github.io/tourara/showcase/) |
 | **مخزن** | [github.com/PersianStudio/tourara](https://github.com/PersianStudio/tourara) |
 | **مجوز** | MIT |
 
@@ -46,7 +51,7 @@
 pnpm add @persianstudio/tourara
 ```
 
-پکیج npm فقط کتابخانهٔ کامپایل‌شده (`dist/`) را شامل می‌شود — نه showcase، نه `src/`، نه `docs/`. دمو روی [GitHub Pages](https://persianstudio.github.io/tourara/) است.
+پکیج npm فقط کتابخانهٔ کامپایل‌شده (`dist/`) را شامل می‌شود — نه showcase، نه `src/`، نه `docs/`. مستندات و دمو روی [GitHub Pages](https://persianstudio.github.io/tourara/docs/) است.
 
 ---
 
@@ -117,7 +122,7 @@ export function App() {
 - آیکن قبلی/بعدی برعکس می‌شود  
 - با ← جلو و با → عقب می‌روید (ترتیب خواندن)  
 
-نمونهٔ زنده در بخش **RTL / LTR** شوی‌کیس: [persianstudio.github.io/tourara/#rtl](https://persianstudio.github.io/tourara/#rtl)
+نمونهٔ زنده در بخش **RTL / LTR** شوی‌کیس: [persianstudio.github.io/tourara/showcase/#rtl](https://persianstudio.github.io/tourara/showcase/#rtl)
 
 ---
 

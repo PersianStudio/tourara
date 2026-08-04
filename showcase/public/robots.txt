@@ -3,5 +3,7 @@ Allow: /
 
 Sitemap: https://persianstudio.github.io/tourara/sitemap.xml
 
-# Tourara demo & docs site — Persian Studio
+# tourara — docs + showcase (Persian Studio)
+# Primary: https://persianstudio.github.io/tourara/docs/
+# Showcase: https://persianstudio.github.io/tourara/showcase/
 Host: https://persianstudio.github.io

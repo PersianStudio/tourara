@@ -3,6 +3,7 @@ node_modules
 dist
 showcase-dist
 docs-dist
+pages-dist
 .DS_Store
 *.local
 .vite

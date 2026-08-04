@@ -1,0 +1,30 @@
+{
+  "name": "tourara docs",
+  "short_name": "tourara",
+  "description": "React product tour documentation — spotlight masks, tips, RTL, custom UI slots.",
+  "start_url": "/tourara/docs/",
+  "scope": "/tourara/docs/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#3b82f6",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/tourara/docs/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/tourara/docs/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/tourara/docs/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://persianstudio.github.io/tourara/sitemap.xml

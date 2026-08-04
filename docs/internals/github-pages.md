@@ -1,67 +1,48 @@
 # GitHub Pages hosting
 
-Tourara publishes **two** surfaces from one workflow:
+Tourara publishes **docs as the primary entry** and the interactive showcase beside it:
 
 | URL | Content |
 |-----|---------|
-| https://persianstudio.github.io/tourara/ | Interactive showcase (`showcase/`) |
-| https://persianstudio.github.io/tourara/docs/ | This documentation site (`docs/` via VitePress) |
+| https://persianstudio.github.io/tourara/ | Redirect → `/tourara/docs/` |
+| https://persianstudio.github.io/tourara/docs/ | VitePress documentation (home + guides + API) |
+| https://persianstudio.github.io/tourara/showcase/ | Interactive demo app |
 
-## How deploy works
+> Project Pages always include the repo name (`/tourara/…`). There is no `persianstudio.github.io/docs` path from this repository — use `/tourara/docs/`.
+
+## Deploy pipeline
 
 Workflow: `.github/workflows/pages.yml`
 
 1. `pnpm build` — library  
-2. `pnpm build:showcase` — Vite app with `base: /tourara/` → `showcase-dist/`  
+2. `pnpm build:showcase` — Vite app with `base: /tourara/showcase/` → `showcase-dist/`  
 3. `pnpm docs:build` — VitePress with `base: /tourara/docs/` → `docs-dist/`  
-4. Copy `docs-dist/**` into `showcase-dist/docs/`  
-5. Upload `showcase-dist` as the Pages artifact  
-6. Deploy with `actions/deploy-pages`
+4. Assemble `pages-dist/`:
+   - `pages-dist/docs/` ← docs  
+   - `pages-dist/showcase/` ← demo  
+   - `pages-dist/index.html` ← redirect to docs  
+   - root `sitemap.xml`, `robots.txt`, `logo.png`  
+5. Upload `pages-dist` and deploy  
 
-```text
-showcase-dist/          ← Pages root for /tourara/
-  index.html            ← demo
-  assets/…
-  docs/                 ← merged VitePress output
-    index.html
-    guide/…
-    api/…
-```
-
-## Local preview
+## Local
 
 ```bash
-pnpm docs:dev          # http://localhost:5174/tourara/docs/ (port may vary)
-pnpm build:showcase && pnpm docs:build
-# optional: serve showcase-dist with a static server to verify merge layout
+pnpm docs:dev          # docs with base /tourara/docs/
+pnpm dev               # showcase with base /tourara/showcase/
+pnpm build:pages       # full Pages-shaped tree in pages-dist/
 ```
 
-## Repo settings (manual, once)
+## Logo / favicon
 
-In GitHub → **Settings → Pages**:
+| File | Use |
+|------|-----|
+| `docs/public/logo.svg` / `logo.png` | Docs header + OG |
+| `showcase/public/favicon.svg` / `logo.png` | Demo favicon / OG |
+| Repo root `logo.png` | Upload as GitHub social preview / optional avatar |
 
-1. Source: **GitHub Actions**  
-2. Ensure the `pages` environment exists (created on first workflow run)  
-3. About → Website: `https://persianstudio.github.io/tourara/`  
+## SEO checklist after deploy
 
-## Base paths
-
-| App | Vite / VitePress `base` |
-|-----|-------------------------|
-| Showcase | `/tourara/` |
-| Docs | `/tourara/docs/` |
-
-If the repo is renamed or moved off `PersianStudio/tourara`, update both bases and the workflow merge path.
-
-## Sitemap & robots
-
-`showcase/public/sitemap.xml` lists the demo and docs URLs. `robots.txt` points crawlers at that sitemap. Update both when adding top-level doc sections.
-
-## Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| Docs 404 at `/tourara/docs/` | Confirm workflow copies into `showcase-dist/docs` and `base` is `/tourara/docs/` |
-| Broken asset URLs in docs | VitePress `base` must match the Pages subpath |
-| Showcase OK, docs stale | Check Actions log for `docs:build` failures |
-| Favicon missing on docs | Config points at `/tourara/favicon.svg` from the showcase public folder |
+1. Confirm https://persianstudio.github.io/tourara/docs/ loads with logo  
+2. Confirm showcase card → https://persianstudio.github.io/tourara/showcase/  
+3. Submit sitemap: https://persianstudio.github.io/tourara/sitemap.xml  
+4. Rich Results / OG debuggers on docs + showcase URLs  

@@ -1,39 +1,46 @@
 # SEO & discoverability
 
-How tourara stays findable on Google, npm, and GitHub.
+How tourara stays findable on Google, npm, and GitHub — and how to keep CTR high.
 
 ## Surfaces
 
-| Surface | Drivers |
-|---------|---------|
-| Showcase (Pages) | Title, meta, OG/Twitter, JSON-LD, sitemap, semantic HTML |
-| Docs (Pages `/docs`) | VitePress titles/descriptions, internal search, edit links |
-| npm | `description`, `keywords`, README badges |
-| GitHub repo | About blurb, topics, social preview |
+| Surface | URL | Drivers |
+|---------|-----|---------|
+| Docs (primary) | `/tourara/docs/` | Title templates, keywords meta, canonical, OG/Twitter, JSON-LD, VitePress sitemap, local search |
+| Showcase | `/tourara/showcase/` | Demo SEO head, structured data, crawlable noscript |
+| Root redirect | `/tourara/` | Canonical → docs |
+| npm | package page | `description`, dense `keywords`, README badges |
+| GitHub | repo | About blurb, topics, **social preview = `logo.png`** |
 
-## Demo + docs
+## Keyword strategy
 
-Source: `showcase/index.html`, `showcase/public/`, `docs/.vitepress/config.ts`.
+Target queries we optimize for:
 
-After deploy, verify:
+- react tour / react product tour / react onboarding  
+- walkthrough / guided tour / feature tour  
+- spotlight mask / tooltip tour  
+- RTL tour / Persian Arabic Hebrew tour  
+- intro.js / shepherd / reactour / driver.js / joyride **alternatives**  
+- TourProvider / custom tour tooltip / MIT react tour  
 
-1. [Rich Results Test](https://search.google.com/test/rich-results) on the demo URL  
-2. OG debuggers for `og-image.jpg`  
-3. Search Console → submit `https://persianstudio.github.io/tourara/sitemap.xml`  
+Docs home includes a short crawlable blurb with those phrases (honest, not keyword stuffing).
 
-## npm keywords
+## After every deploy
 
-Target queries: react tour, onboarding, walkthrough, spotlight, RTL, and familiar alternative names (intro.js, shepherd, reactour, driver.js, joyride).
+1. [Rich Results Test](https://search.google.com/test/rich-results) on docs + showcase  
+2. OG debuggers with `logo.png`  
+3. Search Console → property → sitemap `https://persianstudio.github.io/tourara/sitemap.xml`  
+4. Confirm logo renders in the docs header  
 
-## GitHub About (manual)
+## GitHub manual settings
 
-- **Description:** `React product tours — spotlight mask, tips, RTL, custom slots. MIT. React-only peers.`  
-- **Website:** `https://persianstudio.github.io/tourara/`  
+- **Website:** `https://persianstudio.github.io/tourara/docs/`  
+- **Social preview:** upload repo-root `logo.png`  
 - **Topics:** `react`, `typescript`, `onboarding`, `product-tour`, `walkthrough`, `spotlight`, `rtl`, `tooltip`, `open-source`, `persian-studio`  
 
-## Maintaining scores
+## CTR principles
 
-- Keep JSON-LD / canonical when editing the showcase shell  
-- Keep `og-image.jpg` lean (~1200×630)  
-- Update `sitemap.xml` when adding major doc routes  
-- Prefer descriptive link text over “click here”  
+1. Lead with the problem (“React product tours / onboarding”) then the brand  
+2. Proof: live showcase, MIT, React-only peers, RTL  
+3. Name alternatives only as searchable context  
+4. Keep badges and version current after npm publish  

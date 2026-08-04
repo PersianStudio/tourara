@@ -53,6 +53,7 @@ const forbiddenPatterns = [
   /^src(\/|$)/,
   /^docs(\/|$)/,
   /^docs-dist(\/|$)/,
+  /^pages-dist(\/|$)/,
   /\.map$/,
   /^scripts(\/|$)/,
 ];

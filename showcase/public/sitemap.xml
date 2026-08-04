@@ -1,48 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://persianstudio.github.io/tourara/</loc>
+    <loc>https://persianstudio.github.io/tourara/docs/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://persianstudio.github.io/tourara/docs/</loc>
+    <loc>https://persianstudio.github.io/tourara/docs/guide/getting-started</loc>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://persianstudio.github.io/tourara/docs/guide/getting-started</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <loc>https://persianstudio.github.io/tourara/docs/guide/placement</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://persianstudio.github.io/tourara/docs/guide/rtl</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://persianstudio.github.io/tourara/docs/guide/slots</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://persianstudio.github.io/tourara/docs/api/overview</loc>
     <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://persianstudio.github.io/tourara/docs/api/options</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://persianstudio.github.io/tourara/docs/internals/architecture</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://persianstudio.github.io/tourara/showcase/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://persianstudio.github.io/tourara/#why</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://persianstudio.github.io/tourara/</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://persianstudio.github.io/tourara/#setup</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://persianstudio.github.io/tourara/#rtl</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://www.npmjs.com/package/@persianstudio/tourara</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://github.com/PersianStudio/tourara</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.65</priority>
   </url>
 </urlset>

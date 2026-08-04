@@ -9,6 +9,7 @@ showcase
 showcase-dist
 docs
 docs-dist
+pages-dist
 src
 scripts
 .github

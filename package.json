@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/PersianStudio/tourara.git"
   },
-  "homepage": "https://persianstudio.github.io/tourara/",
+  "homepage": "https://persianstudio.github.io/tourara/docs/",
   "bugs": {
     "url": "https://github.com/PersianStudio/tourara/issues"
   },
@@ -74,11 +74,11 @@
     "docs:dev": "vitepress dev docs --port 5174",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs --port 4174",
-    "clean": "rm -rf dist showcase-dist docs-dist",
+    "clean": "rm -rf dist showcase-dist docs-dist pages-dist",
     "typecheck": "tsc -p tsconfig.lib.json --noEmit",
     "build": "pnpm clean && vite build && cp src/styles/tourara.css dist/tourara.css",
     "build:showcase": "vite build --config vite.showcase.config.ts",
-    "build:pages": "pnpm build:showcase && pnpm docs:build && mkdir -p showcase-dist/docs && cp -R docs-dist/. showcase-dist/docs/",
+    "build:pages": "pnpm build:showcase && pnpm docs:build && rm -rf pages-dist && mkdir -p pages-dist/docs pages-dist/showcase && cp -R docs-dist/. pages-dist/docs/ && cp -R showcase-dist/. pages-dist/showcase/ && cp showcase/public/sitemap.xml pages-dist/sitemap.xml && cp showcase/public/robots.txt pages-dist/robots.txt && cp docs/public/logo.png pages-dist/logo.png && cp docs/public/favicon.svg pages-dist/favicon.svg && node -e \"require('fs').writeFileSync('pages-dist/index.html', '<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta http-equiv=refresh content=\\\"0;url=/tourara/docs/\\\"><link rel=canonical href=https://persianstudio.github.io/tourara/docs/><script>location.replace(\\'/tourara/docs/\\')</script><title>tourara docs</title></head><body><a href=/tourara/docs/>Docs</a> · <a href=/tourara/showcase/>Showcase</a></body></html>')\"",
     "preview": "vite preview --config vite.showcase.config.ts",
     "prepack": "pnpm typecheck && pnpm build",
     "pack:check": "node scripts/assert-npm-pack.mjs",

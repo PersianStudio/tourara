@@ -1,3 +1,5 @@
+import { BrandMark } from './BrandMark';
+
 /**
  * First-viewport hero — brand-first with SEO-friendly supporting copy.
  */
@@ -12,7 +14,7 @@ export function Hero({ tourRunning, onStartMainTour, mode, onToggleMode }: HeroP
   return (
     <header className="hero" role="banner">
       <div className="hero-visual">
-        <div className="float-mark" aria-hidden data-tour="hero-mark" />
+        <BrandMark size={64} className="hero-logo" tourId="hero-mark" />
         <div className="hero-ring" aria-hidden />
       </div>
       <p className="hero-kicker">Persian Studio · open-source React onboarding</p>

@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   root: resolve(__dirname, "showcase"),
-  base: "/tourara/",
+  base: "/tourara/showcase/",
   plugins: [react()],
   resolve: {
     alias: {

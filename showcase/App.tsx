@@ -13,6 +13,7 @@ import { SetupGuide } from './demo/SetupGuide';
 import { WhyBuilt } from './demo/WhyBuilt';
 import { RTL_TOUR_STEPS } from './demo/rtlTourSteps';
 import { CUSTOM_UI_TOUR_STEPS, MAIN_TOUR_STEPS, SETUP_TOUR_STEPS } from './demo/tourSteps';
+import { BrandMark } from './sections/BrandMark';
 import { Hero } from './sections/Hero';
 import { ScrollDeepSection } from './sections/ScrollDeepSection';
 import { useColorMode } from './theme';
@@ -111,8 +112,12 @@ export function App() {
       </main>
 
       <footer className="footer" role="contentinfo">
-        <span>Persian Studio · MIT · @persianstudio/tourara</span>
+        <div className="footer-brand">
+          <BrandMark size={28} />
+          <span>Persian Studio · MIT · @persianstudio/tourara</span>
+        </div>
         <a href="/tourara/docs/">Docs</a>
+        <a href="/tourara/showcase/">Showcase</a>
         <a href="#why">Why tourara</a>
         <a href="#rtl">RTL product tours</a>
         <a href="#setup">Setup guide</a>

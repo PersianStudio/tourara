@@ -42,15 +42,44 @@ jobs:
       - name: Build docs
         run: pnpm docs:build
 
-      - name: Merge docs into Pages artifact
+      - name: Assemble Pages site
         run: |
-          mkdir -p showcase-dist/docs
-          cp -R docs-dist/. showcase-dist/docs/
+          rm -rf pages-dist
+          mkdir -p pages-dist/docs pages-dist/showcase
+          # Docs are the primary entry (also linked from root redirect).
+          cp -R docs-dist/. pages-dist/docs/
+          cp -R showcase-dist/. pages-dist/showcase/
+          # Root → docs so persianstudio.github.io/tourara/ lands on documentation.
+          cat > pages-dist/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1" />
+              <title>tourara — React product tour docs</title>
+              <meta name="description" content="tourara documentation and live showcase. React product tours with SVG spotlight, tips, RTL, and custom slots." />
+              <meta name="robots" content="index, follow" />
+              <link rel="canonical" href="https://persianstudio.github.io/tourara/docs/" />
+              <meta http-equiv="refresh" content="0; url=/tourara/docs/" />
+              <script>location.replace('/tourara/docs/');</script>
+            </head>
+            <body>
+              <p>Redirecting to <a href="/tourara/docs/">tourara documentation</a>…</p>
+              <p><a href="/tourara/showcase/">Open live showcase</a></p>
+            </body>
+          </html>
+          EOF
+          # Site-wide robots + sitemap at Pages root
+          cp showcase/public/robots.txt pages-dist/robots.txt
+          cp showcase/public/sitemap.xml pages-dist/sitemap.xml
+          # Repo avatar / social mark at root for easy linking
+          cp docs/public/logo.png pages-dist/logo.png
+          cp docs/public/favicon.svg pages-dist/favicon.svg
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: showcase-dist
+          path: pages-dist
 
   deploy:
     needs: build

@@ -168,21 +168,28 @@ body {
   position: relative;
 }
 
-.float-mark {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, var(--blue), #60a5fa 45%, var(--yellow));
-  animation: drift 4.8s ease-in-out infinite;
-  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.35);
+.brand-mark,
+.hero-logo {
+  display: block;
+  border-radius: 14px;
   position: relative;
   z-index: 1;
-  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.35);
+  animation: drift 4.8s ease-in-out infinite;
+}
+
+.footer-brand .brand-mark {
+  box-shadow: none;
+  animation: none;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .hero-ring {
   position: absolute;
   inset: -10px;
   border: 1px solid rgba(59, 130, 246, 0.45);
+  border-radius: 18px;
   animation: pulse-ring 3.2s ease-in-out infinite;
 }
 
@@ -1013,9 +1020,17 @@ code {
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem 1.2rem;
+  align-items: center;
   color: var(--muted);
   font-size: 0.85rem;
   font-family: var(--mono);
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-inline-end: 0.35rem;
 }
 
 .footer a {
@@ -1254,7 +1269,8 @@ code {
     scroll-behavior: auto;
   }
 
-  .float-mark,
+  .brand-mark,
+  .hero-logo,
   .hero-ring,
   .moving-orb,
   .demo-shell,
