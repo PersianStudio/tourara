@@ -69,7 +69,9 @@ export function TourPortal({
   const MaskTag = renderMask ? renderMask : Mask;
 
   const maxWidth =
-    typeof tooltipMaxWidth === 'number' ? `${tooltipMaxWidth}px` : tooltipMaxWidth || undefined;
+    typeof tooltipMaxWidth === 'number'
+      ? `min(${tooltipMaxWidth}px, calc(100vw - 24px))`
+      : tooltipMaxWidth || undefined;
 
   const content = (
     <div

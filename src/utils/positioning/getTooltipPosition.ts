@@ -84,25 +84,19 @@ export function getTooltipPosition(args: GetTooltipPositionArgs): OrientationCoo
   }
 
   // Portal overlay is `position: fixed` — use viewport coordinates (getBoundingClientRect space).
-  // Do NOT add scroll offsets; those desync the tooltip/mask from the target when the page scrolls.
-  const adjustedPosition: OrientationCoords = {
+  // Always clamp so small screens never leave the shell off-screen / clipped.
+  const inset = Math.max(8, (padding || 0) + (tooltipSeparation || 0) * 0.35);
+  const clamped = restrictToCurrentViewport(
+    tourRoot,
+    rawPosition.coords,
+    getElementDims(tooltip),
+    inset,
+  );
+
+  return {
     orientation: rawPosition.orientation,
-    coords: rawPosition.coords,
+    coords: clamped,
   };
-
-  if (foreignTarget) {
-    return {
-      orientation: adjustedPosition.orientation,
-      coords: restrictToCurrentViewport(
-        tourRoot,
-        adjustedPosition.coords,
-        getElementDims(tooltip),
-        padding + tooltipSeparation,
-      ),
-    };
-  }
-
-  return adjustedPosition;
 }
 
 /** Viewport coordinates of the target for the fixed tour portal. */

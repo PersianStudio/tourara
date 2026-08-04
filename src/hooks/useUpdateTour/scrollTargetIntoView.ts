@@ -31,9 +31,16 @@ export function scrollTargetIntoView({
   if (lastScrollKey.current === scrollKey) return;
   lastScrollKey.current = scrollKey;
 
+  const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+  const viewH = vv?.height ?? (typeof window !== 'undefined' ? window.innerHeight : 800);
+
+  // Short viewports: prefer nearest so the tooltip/target pair stays usable
+  // without overscrolling past the fold. Taller screens can center.
+  const block: ScrollLogicalPosition = viewH < 480 ? 'nearest' : 'center';
+
   el.scrollIntoView({
     behavior: disableSmoothScroll ? 'auto' : 'smooth',
-    block: 'center',
+    block,
     inline: 'nearest',
   });
 }

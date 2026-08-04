@@ -12,20 +12,44 @@ export function setTargetWatcher(callback: () => void, interval: number): () => 
 }
 
 export interface SetTourUpdateListenerArgs {
-  update: () => void;
+  update: (event?: Event) => void;
   customSetListener?: (update: () => void) => void;
   customRemoveListener?: (update: () => void) => void;
-  event?: string; // default is resize event
+  /** @deprecated Prefer `events`. Kept for callers that pass a single event name. */
+  event?: string;
+  /** Window events that should re-run geometry. Defaults to resize + scroll. */
+  events?: string[];
 }
 
+/**
+ * Bind layout listeners so the mask/tooltip track viewport changes.
+ * Scroll is required: smooth scrollIntoView moves targets in viewport space
+ * while the portal stays fixed — without this the tooltip vanishes off-screen
+ * and only the overlay remains.
+ */
 export function setTourUpdateListener(args: SetTourUpdateListenerArgs) {
-  const { update, customSetListener, customRemoveListener, event } = { event: 'resize', ...args };
+  const {
+    update,
+    customSetListener,
+    customRemoveListener,
+    event,
+    events = event ? [event] : ['resize', 'scroll'],
+  } = args;
+
   if (customSetListener && customRemoveListener) {
     customSetListener(update);
     return () => customRemoveListener(update);
   }
-  window.addEventListener(event, update);
-  return () => window.removeEventListener(event, update);
+
+  const opts: AddEventListenerOptions = { capture: true, passive: true };
+  for (const name of events) {
+    window.addEventListener(name, update, opts);
+  }
+  return () => {
+    for (const name of events) {
+      window.removeEventListener(name, update, opts);
+    }
+  };
 }
 
 export const takeActionIfValid = async (action: () => void, actionValidator?: () => Promise<boolean>) => {

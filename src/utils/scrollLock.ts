@@ -5,16 +5,27 @@
 /**
  * Blocks user-driven scrolling while allowing programmatic scrollIntoView / scrollTo.
  * Uses event prevention instead of overflow:hidden (which breaks scrollIntoView).
+ * Touch/wheel inside the tooltip shell remain allowed so long step bodies can scroll on mobile.
  */
 export function lockUserScroll(): () => void {
+  const isInsideTooltip = (event: Event) => {
+    const target = event.target as HTMLElement | null;
+    return Boolean(
+      target?.closest?.(
+        '.tourara-tooltip-shell, .tourara-tooltip, [id^="tour-tooltip-container"], [id*="tour-tooltip"]',
+      ),
+    );
+  };
+
   const blockWheelTouch = (event: Event) => {
+    if (isInsideTooltip(event)) return;
     event.preventDefault();
   };
 
   const blockKeys = (event: KeyboardEvent) => {
     const target = event.target as HTMLElement | null;
     // Allow typing / arrows inside the tour tooltip for a11y navigation.
-    if (target?.closest?.('[id^="tour-tooltip-container"], [id*="tour-tooltip"]')) {
+    if (target?.closest?.('[id^="tour-tooltip-container"], [id*="tour-tooltip"], .tourara-tooltip-shell')) {
       return;
     }
 

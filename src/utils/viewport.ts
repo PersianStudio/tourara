@@ -7,11 +7,17 @@ import { Coords, Dims, getElementCoords, getElementDims, isDefaultScrollingEleme
 import { addAppropriateOffset, getCurrentScrollOffset } from './offset';
 
 export function getViewportHeight(root: Element): number {
-  return root.clientHeight;
+  if (typeof window !== 'undefined' && window.visualViewport && isDefaultScrollingElement(root)) {
+    return window.visualViewport.height;
+  }
+  return root.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 0);
 }
 
 export function getViewportWidth(root: Element): number {
-  return root.clientWidth;
+  if (typeof window !== 'undefined' && window.visualViewport && isDefaultScrollingElement(root)) {
+    return window.visualViewport.width;
+  }
+  return root.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 0);
 }
 
 export function getViewportDims(root: Element): Dims {

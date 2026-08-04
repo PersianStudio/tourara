@@ -23,9 +23,17 @@ export type PointerPlacement = {
   side: PointerSide;
   /** Distance along the side from its start edge to the caret’s near corner. Unused for corners. */
   offset: number;
+  /** Tip length (edge: separation; corner: distance to focus border). */
   size: number;
+  /** Half-width of the triangle base. Defaults to `size` for edge carets. */
+  base?: number;
   aimX: number;
   aimY: number;
+  /**
+   * Corner carets only: CSS degrees applied to a tip-up triangle so the tip
+   * faces (aimX, aimY). 0 keeps the tip pointing up.
+   */
+  rotation?: number;
 };
 
 export type PlaceTooltipPointerArgs = {
@@ -62,6 +70,28 @@ function closestPointOnRect(px: number, py: number, rect: Rect): { x: number; y:
 
 function isCornerSide(side: PointerSide): boolean {
   return side.includes('-');
+}
+
+function cornerPoint(tooltip: Rect, side: PointerSide): { x: number; y: number } {
+  switch (side) {
+    case 'top-left':
+      return { x: tooltip.left, y: tooltip.top };
+    case 'top-right':
+      return { x: tooltip.right, y: tooltip.top };
+    case 'bottom-left':
+      return { x: tooltip.left, y: tooltip.bottom };
+    case 'bottom-right':
+      return { x: tooltip.right, y: tooltip.bottom };
+    default:
+      return { x: (tooltip.left + tooltip.right) / 2, y: (tooltip.top + tooltip.bottom) / 2 };
+  }
+}
+
+/** Degrees to rotate a tip-up caret so its tip faces the aim point. */
+function rotationToward(fromX: number, fromY: number, toX: number, toY: number): number {
+  const angleRad = Math.atan2(toY - fromY, toX - fromX);
+  // tip-up points at -90° in screen space; CSS rotate is clockwise-positive.
+  return (angleRad * 180) / Math.PI + 90;
 }
 
 /**
@@ -160,19 +190,31 @@ export function placeTooltipPointer(args: PlaceTooltipPointerArgs): PointerPlace
   const edgeInset = Math.min(12, Math.max(6, arrowSize));
 
   let offset = 0;
-  if (!isCornerSide(side)) {
-    if (side === 'top' || side === 'bottom') {
-      const raw = aim.x - tooltip.left - arrowSize;
-      const max = Math.max(edgeInset, tooltip.width - baseWidth - edgeInset);
-      offset = Math.min(Math.max(raw, edgeInset), max);
-    } else {
-      const raw = aim.y - tooltip.top - arrowSize;
-      const max = Math.max(edgeInset, tooltip.height - baseWidth - edgeInset);
-      offset = Math.min(Math.max(raw, edgeInset), max);
-    }
+  let rotation: number | undefined;
+  let size = arrowSize;
+  let base: number | undefined;
+
+  if (isCornerSide(side)) {
+    const corner = cornerPoint(tooltip, side);
+    rotation = rotationToward(corner.x, corner.y, aim.x, aim.y);
+    // Long skinny caret: tip meets the focus border, base stays arrow-sized.
+    // Cap length so a bad placement can't paint a viewport-long spike on mobile.
+    const gap = Math.hypot(aim.x - corner.x, aim.y - corner.y);
+    const maxReach = Math.max(arrowSize * 2.5, 36);
+    size = Math.max(6, Math.min(gap, maxReach));
+    base = arrowSize;
+  } else if (side === 'top' || side === 'bottom') {
+    const raw = aim.x - tooltip.left - arrowSize;
+    const max = Math.max(edgeInset, tooltip.width - baseWidth - edgeInset);
+    offset = Math.min(Math.max(raw, edgeInset), max);
+  } else {
+    const raw = aim.y - tooltip.top - arrowSize;
+    const max = Math.max(edgeInset, tooltip.height - baseWidth - edgeInset);
+    offset = Math.min(Math.max(raw, edgeInset), max);
   }
 
-  if (!Number.isFinite(offset)) return null;
+  if (!Number.isFinite(offset) || !Number.isFinite(size)) return null;
+  if (rotation !== undefined && !Number.isFinite(rotation)) return null;
 
-  return { side, offset, size: arrowSize, aimX: aim.x, aimY: aim.y };
+  return { side, offset, size, base, aimX: aim.x, aimY: aim.y, rotation };
 }

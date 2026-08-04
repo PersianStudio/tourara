@@ -87,10 +87,15 @@ export function Mask(props: MaskOptions) {
     };
 
     window.addEventListener('resize', updateDimensions, { passive: true });
+    window.addEventListener('orientationchange', updateDimensions, { passive: true });
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', updateDimensions);
     updateDimensions();
 
     return () => {
       window.removeEventListener('resize', updateDimensions);
+      window.removeEventListener('orientationchange', updateDimensions);
+      vv?.removeEventListener('resize', updateDimensions);
     };
   }, [tourRoot]);
 
@@ -98,8 +103,10 @@ export function Mask(props: MaskOptions) {
 
   const svgStyle: React.CSSProperties = {
     overflow: 'hidden',
-    height: '100vh',
-    width: '100vw',
+    height: '100%',
+    width: '100%',
+    maxHeight: '100dvh',
+    maxWidth: '100%',
     pointerEvents: disableMaskInteraction ? 'auto' : 'none',
   };
 

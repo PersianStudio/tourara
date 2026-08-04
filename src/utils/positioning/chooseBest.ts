@@ -16,7 +16,6 @@ import {
 } from '../dom';
 import {
   centerViewportAroundElements,
-  getCurrentScrollOffset,
   getViewportCenter,
 } from '../offset';
 import {
@@ -87,9 +86,8 @@ export function chooseBestTooltipPosition(
   target: HTMLElement,
   scrollDisabled: boolean,
 ): OrientationCoords {
-  if (preferredCandidates.length === 1) {
-    //if there's only a single pref candidate, use that
-    return preferredCandidates[0];
+  if (!preferredCandidates || preferredCandidates.length === 0) {
+    return undefined;
   }
   if (scrollDisabled) {
     // if scrolling is disabled, there's not much we can do except use the naive center reducer
@@ -125,11 +123,24 @@ export function chooseBestTooltipPosition(
   const compatiblePositions: OrientationCoords[] =
     currentCompatiblePositions.length > 0 ? currentCompatiblePositions : absoluteCompatiblePositions;
 
-  // if there are NO compatible positions, the viewport is too small to accomodate both the target/tooltip, in any arrangement.
-  // we default to our valid positions, even if that means placing the elements slightly off screen.
-  const filteredList = compatiblePositions.length > 0 ? compatiblePositions : validPositions;
+  // Prefer any compatible placement. If none fit (tiny viewport / huge target),
+  // fall back to CENTER rather than intentionally placing off-screen.
+  if (compatiblePositions.length > 0) {
+    return compatiblePositions.reduce(getCenterReducer(root, tooltip, target, true), undefined);
+  }
 
-  return filteredList.reduce(getCenterReducer(root, tooltip, target, true), undefined);
+  const filteredList = validPositions.length > 0 ? validPositions : preferredCandidates;
+  const fallback = filteredList.reduce(getCenterReducer(root, tooltip, target, true), undefined);
+  if (fallback) return fallback;
+
+  // Last resort: center over the target so clamp can keep it on-screen.
+  return {
+    orientation: CardinalOrientation.CENTER,
+    coords: {
+      x: targetCoords.x + targetDims.width / 2 - tooltipDims.width / 2,
+      y: targetCoords.y + targetDims.height / 2 - tooltipDims.height / 2,
+    },
+  };
 }
 
 /** Filter out positions where the tooltip is outside the scrollable root bounds. */
@@ -186,48 +197,48 @@ export function getPreferredCandidates(
   if (!orientationPreferences || orientationPreferences.length === 0) {
     return candidates;
   }
-  if (orientationPreferences.length === 1) {
-    const specifiedCandidate = candidates.find((oc: OrientationCoords) => oc.orientation === orientationPreferences[0]);
-    if (specifiedCandidate) {
-      return [specifiedCandidate];
-    }
-    return candidates; // if the specified orientation isn't available for whatever reason, default to standard behavior
-  }
-  const preferenceFilter = (cc: OrientationCoords) => orientationPreferences.indexOf(cc.orientation) !== -1;
-  return candidates.filter(preferenceFilter);
+  // Always keep the full preference set for fit scoring — a single pinned
+  // orientation that doesn't fit must still be able to fall back via chooseBest.
+  const preferred = candidates.filter(
+    (cc: OrientationCoords) => orientationPreferences.indexOf(cc.orientation) !== -1,
+  );
+  return preferred.length > 0 ? preferred : candidates;
 }
 
-/** Clamp coordinates so the element stays fully inside the current viewport (with padding). */
+/**
+ * Clamp fixed/viewport coordinates so the tooltip stays inside the visible
+ * viewport (getBoundingClientRect space). Uses visual viewport when available.
+ */
 export function restrictToCurrentViewport(root: Element, coords: Coords, dims: Dims, padding: number): Coords {
-  if (!root) {
+  if (!root || !coords) {
     return coords;
   }
 
-  const viewportStart: Coords = getCurrentScrollOffset(root);
-  const viewportDims: Dims = getViewportDims(root);
-  const viewportEnd: Coords = {
-    x: viewportStart.x + viewportDims.width,
-    y: viewportStart.y + viewportDims.height,
+  const inset = Math.max(0, padding);
+  const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+  const start = getViewportStart(root);
+  const viewportDims = getViewportDims(root);
+
+  // Prefer the on-screen visual viewport (mobile URL bar / keyboard).
+  const originX = vv ? vv.offsetLeft : start.x;
+  const originY = vv ? vv.offsetTop : start.y;
+  const viewW = vv ? vv.width : viewportDims.width;
+  const viewH = vv ? vv.height : viewportDims.height;
+
+  const sx = originX + inset;
+  const sy = originY + inset;
+  const maxX = originX + viewW - inset;
+  const maxY = originY + viewH - inset;
+
+  const width = Math.max(0, dims?.width || 0);
+  const height = Math.max(0, dims?.height || 0);
+
+  // If the tooltip is wider/taller than the padded viewport, pin to the start edge.
+  const ex = Math.max(sx, maxX - width);
+  const ey = Math.max(sy, maxY - height);
+
+  return {
+    x: Math.min(Math.max(coords.x, sx), ex),
+    y: Math.min(Math.max(coords.y, sy), ey),
   };
-  const sx = viewportStart.x + padding;
-  const sy = viewportStart.y + padding;
-  const ex = viewportEnd.x - dims.width - padding;
-  const ey = viewportEnd.y - dims.height - padding;
-
-  let x: number = coords.x;
-  let y: number = coords.y;
-
-  if (coords.x < sx) {
-    x = sx;
-  } else if (coords.x + dims.width > ex) {
-    x = ex;
-  }
-
-  if (coords.y < sy) {
-    y = sy;
-  } else if (coords.y + dims.height > ey) {
-    y = ey;
-  }
-
-  return { x, y };
 }

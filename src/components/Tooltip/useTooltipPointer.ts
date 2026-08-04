@@ -65,7 +65,9 @@ export function useTooltipPointer({
         next &&
         prev.side === next.side &&
         Math.abs(prev.offset - next.offset) < 0.5 &&
-        prev.size === next.size
+        prev.size === next.size &&
+        (prev.base ?? prev.size) === (next.base ?? next.size) &&
+        Math.abs((prev.rotation ?? 0) - (next.rotation ?? 0)) < 0.5
       ) {
         return prev;
       }

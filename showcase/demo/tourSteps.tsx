@@ -143,11 +143,19 @@ export const MAIN_TOUR_STEPS: TourStep[] = [
     content: 'Replace Skip / chevrons with your own footer via customFooterRenderer.',
     noSkipBtn: true,
     customFooterRenderer: (logic) => (
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: '100%' }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        flexWrap="wrap"
+        useFlexGap
+        spacing={1}
+        sx={{ width: '100%', rowGap: 1 }}
+      >
         <Button size="small" color="inherit" onClick={() => logic?.close(true)} sx={{ opacity: 0.8 }}>
           Exit
         </Button>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
           <Button size="small" variant="outlined" color="inherit" onClick={() => logic?.prev()} disabled={logic!.stepIndex === 0}>
             Back
           </Button>
@@ -165,24 +173,26 @@ export const MAIN_TOUR_STEPS: TourStep[] = [
     customTooltipRenderer: (logic) => (
       <Box
         sx={{
-          p: 2.5,
+          p: { xs: 1.75, sm: 2.5 },
           borderRadius: 3,
           bgcolor: '#0d6e6e',
           color: '#f7fffe',
           boxShadow: '0 24px 48px rgba(13,110,110,0.35)',
-          maxWidth: 360,
+          maxWidth: 'min(360px, calc(100vw - 32px))',
+          width: '100%',
+          boxSizing: 'border-box',
         }}
       >
         <Typography variant="overline" sx={{ opacity: 0.75, letterSpacing: 1.2 }}>
           customTooltipRenderer
         </Typography>
-        <Typography variant="h6" sx={{ fontFamily: 'Fraunces, Georgia, serif', mb: 1 }}>
+        <Typography variant="h6" sx={{ fontFamily: 'Fraunces, Georgia, serif', mb: 1, fontSize: { xs: '1.05rem', sm: '1.25rem' } }}>
           Bring your own chrome
         </Typography>
         <Typography variant="body2" sx={{ mb: 2, opacity: 0.9, lineHeight: 1.5 }}>
           Swap the default MUI tooltip entirely while keeping mask, placement, and navigation logic.
         </Typography>
-        <Stack direction="row" spacing={1} justifyContent="flex-end">
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" justifyContent="flex-end">
           <Button size="small" color="inherit" onClick={() => logic?.prev()}>
             Back
           </Button>
@@ -275,7 +285,9 @@ export const CUSTOM_UI_TOUR_STEPS: TourStep[] = [
           bgcolor: '#f5c542',
           color: '#0b1220',
           border: '2px solid #1d4ed8',
-          maxWidth: 320,
+          maxWidth: 'min(320px, calc(100vw - 32px))',
+          width: '100%',
+          boxSizing: 'border-box',
         }}
       >
         <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: 1 }}>
@@ -287,7 +299,7 @@ export const CUSTOM_UI_TOUR_STEPS: TourStep[] = [
         <Typography variant="body2" sx={{ mb: 1.25, opacity: 0.9 }}>
           Prove that slots can look nothing like the default MUI chrome.
         </Typography>
-        <Stack direction="row" spacing={1} justifyContent="flex-end">
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" justifyContent="flex-end">
           <Button size="small" onClick={() => logic?.prev()} sx={{ color: '#0b1220' }}>
             Back
           </Button>

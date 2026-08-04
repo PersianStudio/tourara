@@ -112,8 +112,10 @@ export const useUpdateTour = ({
         updateGeometry: () => updateGeometry(false),
         targetPosition,
         targetSize,
-        duration: 480,
-        stabilityThreshold: 3,
+        // Smooth scrollIntoView can outlast a short settle; scroll listeners
+        // keep tracking, but stay alive long enough for typical page jumps.
+        duration: 1600,
+        stabilityThreshold: 4,
       });
     });
 

@@ -1,7 +1,7 @@
 /**
  * Geometry-aligned caret that points from the tooltip at the focus border.
- * Edge carets use CSS borders; corner carets use a rotated diamond so the
- * tip faces the diagonal aim point (e.g. top-right → northeast).
+ * Edge carets use CSS border triangles; corner carets use the same triangle
+ * rotated and translated so the tip lands on the aim point.
  */
 import type { CSSProperties } from 'react';
 import type { PointerPlacement, PointerSide } from './placeTooltipPointer';
@@ -14,9 +14,43 @@ function isCornerSide(side: PointerSide): boolean {
   return side.includes('-');
 }
 
-function caretStyle(side: PointerSide, offset: number, size: number): CSSProperties {
+/** Fallback when rotation is missing — tip faces the named corner direction. */
+function defaultCornerRotation(side: PointerSide): number {
+  switch (side) {
+    case 'top-right':
+      return 45;
+    case 'top-left':
+      return -45;
+    case 'bottom-right':
+      return 135;
+    case 'bottom-left':
+      return -135;
+    default:
+      return 0;
+  }
+}
+
+/** Pin the tip-up triangle’s tip origin to the card corner. */
+function cornerAnchor(side: PointerSide, overlap: number): CSSProperties {
+  switch (side) {
+    case 'top-right':
+      return { top: -overlap, right: 0 };
+    case 'top-left':
+      return { top: -overlap, left: 0 };
+    case 'bottom-right':
+      return { top: 'auto', bottom: -overlap, right: 0 };
+    case 'bottom-left':
+      return { top: 'auto', bottom: -overlap, left: 0 };
+    default:
+      return {};
+  }
+}
+
+function caretStyle(placement: PointerPlacement): CSSProperties {
+  const { side, offset, size, base, rotation } = placement;
   const color = 'var(--tourara-bg)';
   const transparent = 'transparent';
+  const halfBase = base ?? size;
 
   // 1px overlap removes the sub-pixel gap against the rounded card edge.
   const overlap = 1;
@@ -30,72 +64,63 @@ function caretStyle(side: PointerSide, offset: number, size: number): CSSPropert
     boxSizing: 'border-box',
   };
 
-  if (isCornerSide(side)) {
-    // Diamond peeking from the corner; the outer tip aims diagonally.
-    const diamond = size * 1.15;
-    const inset = -(diamond / 2) + overlap;
-    const base: CSSProperties = {
-      ...common,
-      width: diamond,
-      height: diamond,
-      background: color,
-      transform: 'rotate(45deg)',
-      borderRadius: 1,
-    };
+  // Tip-up triangle: length = size, base width = 2 * halfBase.
+  const tipUp: CSSProperties = {
+    ...common,
+    borderLeft: `${halfBase}px solid ${transparent}`,
+    borderRight: `${halfBase}px solid ${transparent}`,
+    borderBottom: `${size}px solid ${color}`,
+  };
 
-    switch (side) {
-      case 'top-right':
-        return { ...base, top: inset, right: inset };
-      case 'top-left':
-        return { ...base, top: inset, left: inset };
-      case 'bottom-right':
-        return { ...base, bottom: inset, right: inset };
-      case 'bottom-left':
-        return { ...base, bottom: inset, left: inset };
-      default:
-        return common;
-    }
+  if (isCornerSide(side)) {
+    const deg = rotation ?? defaultCornerRotation(side);
+    // rotation = atan2(dy,dx)*180/PI + 90  →  aim angle = deg - 90
+    const aimRad = ((deg - 90) * Math.PI) / 180;
+    const tx = Math.cos(aimRad) * size;
+    const ty = Math.sin(aimRad) * size;
+
+    return {
+      ...tipUp,
+      ...cornerAnchor(side, overlap),
+      // Rotate around the tip, then push the tip out to the focus border.
+      // CSS applies right-to-left: rotate first, then translate in screen space.
+      transform: `translate(${tx}px, ${ty}px) rotate(${deg}deg)`,
+      transformOrigin: '0 0',
+    };
   }
 
   switch (side) {
     case 'top':
-      // Tip points up (target is above the tooltip).
       return {
-        ...common,
+        ...tipUp,
         top: -(size - overlap),
         left: offset,
-        borderLeft: `${size}px solid ${transparent}`,
-        borderRight: `${size}px solid ${transparent}`,
-        borderBottom: `${size}px solid ${color}`,
       };
     case 'bottom':
-      // Tip points down.
       return {
         ...common,
         bottom: -(size - overlap),
         left: offset,
-        borderLeft: `${size}px solid ${transparent}`,
-        borderRight: `${size}px solid ${transparent}`,
+        borderLeft: `${halfBase}px solid ${transparent}`,
+        borderRight: `${halfBase}px solid ${transparent}`,
         borderTop: `${size}px solid ${color}`,
       };
     case 'left':
-      // Tip points left.
       return {
         ...common,
         left: -(size - overlap),
         top: offset,
-        borderTop: `${size}px solid ${transparent}`,
-        borderBottom: `${size}px solid ${transparent}`,
+        borderTop: `${halfBase}px solid ${transparent}`,
+        borderBottom: `${halfBase}px solid ${transparent}`,
         borderRight: `${size}px solid ${color}`,
       };
     case 'right':
-      // Tip points right.
       return {
         ...common,
         right: -(size - overlap),
         top: offset,
-        borderTop: `${size}px solid ${transparent}`,
-        borderBottom: `${size}px solid ${transparent}`,
+        borderTop: `${halfBase}px solid ${transparent}`,
+        borderBottom: `${halfBase}px solid ${transparent}`,
         borderLeft: `${size}px solid ${color}`,
       };
     default:
@@ -104,12 +129,10 @@ function caretStyle(side: PointerSide, offset: number, size: number): CSSPropert
 }
 
 export function TooltipPointer({ placement }: TooltipPointerProps) {
-  const { side, offset, size } = placement;
-
   return (
     <div
-      className={`tourara-tooltip-pointer tourara-tooltip-pointer--${side}`}
-      style={caretStyle(side, offset, size)}
+      className={`tourara-tooltip-pointer tourara-tooltip-pointer--${placement.side}`}
+      style={caretStyle(placement)}
       aria-hidden
     />
   );

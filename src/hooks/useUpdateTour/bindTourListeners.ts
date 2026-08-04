@@ -17,6 +17,7 @@ import {
   shouldUpdate as utilShouldUpdate,
 } from '../../utils/tour';
 import { resolveOrientationPreferences } from '../../utils/direction';
+import { createFrameScheduler } from '../../utils/frameScheduler';
 import { applyTourGeometry } from './applyTourGeometry';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,6 +89,21 @@ export function bindTourListeners(args: BindTourListenersArgs): void {
   const cleanupFocusTrap = setFocusTrap(tooltipContainer, currentTarget, disableMaskInteraction);
   cleanupRefs.current.push(cleanupFocusTrap);
 
+  const runGeometry = (allowScroll: boolean) => {
+    applyTourGeometry({
+      options,
+      tooltip,
+      tourRoot,
+      setTooltipPosition,
+      currentStepIndex,
+      setTarget,
+      targetPosition,
+      targetSize,
+      lastScrollKey,
+      allowScroll,
+    });
+  };
+
   const conditionalUpdate = () => {
     const availableTarget =
       (targetScope.querySelector(selector) as HTMLElement | null) || undefined;
@@ -109,28 +125,48 @@ export function bindTourListeners(args: BindTourListenersArgs): void {
         tooltipSeparation,
       })
     ) {
-      applyTourGeometry({
-        options,
-        tooltip,
-        tourRoot,
-        setTooltipPosition,
-        currentStepIndex,
-        setTarget,
-        targetPosition,
-        targetSize,
-        lastScrollKey,
-        allowScroll: true,
-      });
+      // Scroll keys already recorded for this step — do not re-fire scrollIntoView.
+      runGeometry(false);
     }
   };
 
-  // Coalesce resize bursts; 300ms default is fine for layout, not every paint.
+  // Resize can burst; scroll must track every frame while smooth scrollIntoView runs.
+  const onResize = debounce(conditionalUpdate, 150);
+  const { schedule: scheduleScrollGeometry, cancel: cancelScrollGeometry } = createFrameScheduler(
+    () => runGeometry(false),
+  );
+
+  const onWindowEvent = (event?: Event) => {
+    if (event?.type === 'scroll' || event?.type === 'scrollend') {
+      scheduleScrollGeometry();
+      return;
+    }
+    onResize();
+  };
+
   const cleanupUpdateListener = setTourUpdateListener({
-    update: debounce(conditionalUpdate, 150),
+    update: onWindowEvent,
+    events: ['resize', 'scroll', 'scrollend', 'orientationchange'],
     customSetListener: setUpdateListener,
     customRemoveListener: removeUpdateListener,
   });
-  cleanupRefs.current.push(cleanupUpdateListener);
+
+  // Mobile browser chrome / soft keyboard — visualViewport moves independently of window.
+  const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+  const onVisualViewport = () => scheduleScrollGeometry();
+  if (vv) {
+    vv.addEventListener('resize', onVisualViewport);
+    vv.addEventListener('scroll', onVisualViewport);
+  }
+
+  cleanupRefs.current.push(() => {
+    cancelScrollGeometry();
+    cleanupUpdateListener();
+    if (vv) {
+      vv.removeEventListener('resize', onVisualViewport);
+      vv.removeEventListener('scroll', onVisualViewport);
+    }
+  });
 
   // movingTarget polling — floor interval so demos cannot set 0 / tiny values.
   if (movingTarget && (currentTarget || selector)) {
