@@ -7,7 +7,7 @@ import { getTargetInfo, getValidPortalRoot } from '../../utils/dom';
 import type { OrientationCoords } from '../../utils/positioning';
 import { getIdString } from '../../utils/tour';
 import { Mask } from '../Mask';
-import { Tip } from '../Tip';
+import { TipLayer } from '../Tip';
 import { Tooltip } from '../Tooltip';
 
 export interface TourPortalProps {
@@ -127,19 +127,18 @@ export function TourPortal({
         </Box>
       )}
 
-      {tourRoot &&
-        steps.map((step, index) => (
-          <Tip
-            key={index}
-            step={step}
-            index={index}
-            isVisible={step.isVisible}
-            goToStep={goToStep}
-            activeIndex={currentStepIndex}
-            containerRoot={tourRoot}
-            direction={direction}
-          />
-        ))}
+      {tourRoot && (
+        <TipLayer
+          steps={steps}
+          currentStepIndex={currentStepIndex}
+          tourRoot={tourRoot}
+          direction={direction}
+          goToStep={goToStep}
+          activeTarget={target}
+          maskPadding={maskPadding || 0}
+          tooltipRef={tooltipRef}
+        />
+      )}
     </Box>
   );
 

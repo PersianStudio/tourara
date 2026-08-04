@@ -59,6 +59,17 @@ Internal folder moves are allowed as long as **`src/index.ts` exports stay compa
 - RTL mirrors east/west placement preferences and flips chevrons / arrow-key order.
 - Locale strings are **not** auto-translated; pass `finishBtnText`, `skipBtnText`, etc.
 
+## Tip markers
+
+Inactive tip markers are placed by `TipLayer` in one pass. Placement avoids:
+
+1. The active spotlight hole (target + `maskPadding`)
+2. The open tooltip chrome
+3. Other tip markers
+4. Neighboring tip targets (so markers don’t sit on another hotspot)
+
+If no clear slot exists, that tip is **hidden** rather than drawn over the tour.
+
 ## Coordinate space
 
 The tour portal is `position: fixed`. Mask, tooltip, and tip positions use **viewport coordinates** (`getBoundingClientRect`), not document-scroll offsets.
